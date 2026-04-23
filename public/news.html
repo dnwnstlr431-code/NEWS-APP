@@ -1,64 +1,33 @@
-<script>
-    const params = new URLSearchParams(window.location.search);
-    const stock = params.get('stock');
-    const stockName = params.get('name');
-
-    if (stockName) {
-        document.getElementById('pageTitle').textContent = `${stockName} 뉴스`;
-    }
-
-    function goHome() {
-        window.location.href = 'index.html';
-    }
-
-    async function fetchNews() {
-        const loading = document.getElementById('loading');
-        const error = document.getElementById('error');
-        const newsList = document.getElementById('newsList');
+async function fetchNews() {
+    const loading = document.getElementById('loading');
+    const newsList = document.getElementById('newsList');
+    
+    loading.style.display = 'block';
+    newsList.innerHTML = '';
+    
+    try {
+        // 상대 경로 사용
+        const response = await fetch(`/api/news?stock=${stock}`);
+        const data = await response.json();
         
-        loading.style.display = 'block';
-        error.style.display = 'none';
-        newsList.innerHTML = '';
-        
-        try {
-            // 주소는 지금처럼 상대경로를 유지하는 것이 맞습니다.
-            const response = await fetch(`/api/news?stock=${stock}`);
-            const data = await response.json();
-            
-            if (!data.success) {
-                error.textContent = '❌ 오류: ' + (data.error || '뉴스를 가져오지 못했습니다.');
-                error.style.display = 'block';
-                loading.style.display = 'none';
-                return;
-            }
-            
-            if (data.news && data.news.length > 0) {
-                newsList.innerHTML = data.news.map((item) => `
-                    <div class="news-item">
-                        <div class="news-date">📅 ${item.publishedAt}</div>
-                        <div class="news-title"><a href="${item.url}" target="_blank" style="text-decoration:none; color:inherit;">${item.title}</a></div>
-                        <div class="news-source">📰 ${item.source}</div>
-                        <div class="news-content">
-                            ${item.content}
-                        </div>
-                        <div class="analysis">
-                            <div class="analysis-label">🤖 AI 요약 및 분석:</div>
-                            <div class="analysis-text">${item.analysis}</div>
-                            <div class="importance">
-                                중요도: ${item.importance}/5 ⭐
-                            </div>
-                        </div>
+        if (data.success) {
+            newsList.innerHTML = data.news.map(item => `
+                <div class="news-item">
+                    <div class="news-date">📅 ${item.publishedAt}</div>
+                    <div class="news-title"><a href="${item.url}" target="_blank">${item.title}</a></div>
+                    <div class="analysis">
+                        <div class="analysis-label">🤖 AI 분석:</div>
+                        <div class="analysis-text">${item.analysis}</div>
+                        <div class="importance">중요도: ${item.importance}/5 ⭐</div>
                     </div>
-                `).join('');
-            } else {
-                newsList.innerHTML = '<div class="empty">최신 뉴스가 없습니다.</div>';
-            }
-            
-        } catch (err) {
-            error.textContent = '❌ 서버 연결 오류: ' + err.message;
-            error.style.display = 'block';
+                </div>
+            `).join('');
+        } else {
+            alert("에러 발생: " + data.error);
         }
-        
-        loading.style.display = 'none';
+    } catch (err) {
+        console.error(err);
+        alert("서버 연결 실패! Vercel 도메인으로 접속했는지 확인하세요.");
     }
-</script>
+    loading.style.display = 'none';
+}
