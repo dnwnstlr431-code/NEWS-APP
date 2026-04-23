@@ -1,307 +1,64 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>뉴스</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-        
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 12px;
-            padding: 35px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-        }
-        
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 35px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid #ecf0f1;
-        }
+<script>
+    const params = new URLSearchParams(window.location.search);
+    const stock = params.get('stock');
+    const stockName = params.get('name');
 
-        .header-left {
-            flex: 1;
-        }
+    if (stockName) {
+        document.getElementById('pageTitle').textContent = `${stockName} 뉴스`;
+    }
 
-        .youtube-link {
-            display: inline-block;
-            font-size: 12px;
-            color: #7f8c8d;
-            text-decoration: none;
-            transition: 0.3s;
-            padding: 5px 8px;
-            border-radius: 4px;
-            margin-bottom: 8px;
-        }
+    function goHome() {
+        window.location.href = 'index.html';
+    }
 
-        .youtube-link:hover {
-            color: #e74c3c;
-            background: rgba(231, 76, 60, 0.05);
-        }
+    async function fetchNews() {
+        const loading = document.getElementById('loading');
+        const error = document.getElementById('error');
+        const newsList = document.getElementById('newsList');
         
-        h1 {
-            color: #2c3e50;
-            font-size: 28px;
-            font-weight: 700;
-            margin: 0;
-        }
+        loading.style.display = 'block';
+        error.style.display = 'none';
+        newsList.innerHTML = '';
         
-        .back-btn {
-            background: #3498db;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            transition: 0.3s;
-        }
-        
-        .back-btn:hover {
-            background: #2980b9;
-            transform: scale(1.05);
-        }
-        
-        .button-group {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        
-        .refresh-btn {
-            background: #27ae60;
-            color: white;
-            border: none;
-            padding: 12px 35px;
-            border-radius: 6px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-        
-        .refresh-btn:hover {
-            background: #229954;
-            transform: scale(1.05);
-        }
-        
-        .loading {
-            text-align: center;
-            color: #3498db;
-            font-size: 16px;
-            padding: 40px;
-            display: none;
-            font-weight: 500;
-        }
-        
-        #newsList {
-            display: flex;
-            flex-direction: column;
-            gap: 25px;
-        }
-        
-        .news-item {
-            border-left: 4px solid #3498db;
-            padding: 25px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            transition: all 0.3s;
-        }
-        
-        .news-item:hover {
-            background: #ecf0f1;
-            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.2);
-        }
-        
-        .news-date {
-            font-size: 13px;
-            font-weight: 700;
-            color: #e74c3c;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 10px;
-        }
-        
-        .news-title {
-            font-size: 18px;
-            font-weight: 700;
-            color: #2c3e50;
-            margin-bottom: 12px;
-            line-height: 1.5;
-        }
-        
-        .news-source {
-            font-size: 12px;
-            color: #95a5a6;
-            margin-bottom: 15px;
-        }
-        
-        .news-content {
-            color: #555;
-            line-height: 1.7;
-            margin-bottom: 18px;
-            font-size: 15px;
-        }
-        
-        .analysis {
-            background: white;
-            padding: 18px;
-            border-radius: 6px;
-            margin-top: 15px;
-            border-left: 3px solid #9b59b6;
-        }
-        
-        .analysis-label {
-            font-weight: 700;
-            color: #9b59b6;
-            margin-bottom: 8px;
-            font-size: 14px;
-        }
-        
-        .analysis-text {
-            color: #555;
-            font-size: 14px;
-            line-height: 1.6;
-        }
-        
-        .importance {
-            display: inline-block;
-            background: #f39c12;
-            color: white;
-            padding: 6px 12px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: 600;
-            margin-top: 12px;
-        }
-        
-        .error {
-            color: #c0392b;
-            text-align: center;
-            padding: 25px;
-            background: #fadbd8;
-            border-radius: 8px;
-            border-left: 4px solid #c0392b;
-            display: none;
-            font-weight: 500;
-        }
-        
-        .empty {
-            text-align: center;
-            color: #95a5a6;
-            padding: 60px 20px;
-            font-size: 16px;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <div class="header-left">
-                <a href="https://www.youtube.com/@투자의정석-z2o" target="_blank" class="youtube-link">
-                    🎬 투자의정석
-                </a>
-                <h1 id="pageTitle">뉴스</h1>
-            </div>
-            <button class="back-btn" onclick="goHome()">← 돌아가기</button>
-        </div>
-        
-        <div class="button-group">
-            <button class="refresh-btn" onclick="fetchNews()">🔄 뉴스 갱신</button>
-        </div>
-        
-        <div class="loading" id="loading">
-            ⏳ 뉴스를 가져오고 분석하는 중입니다...
-        </div>
-        
-        <div class="error" id="error"></div>
-        
-        <div id="newsList">
-            <div class="empty">
-                "뉴스 갱신" 버튼을 클릭해서 최신 뉴스를 확인하세요!
-            </div>
-        </div>
-    </div>
-
-    <script>
-        const params = new URLSearchParams(window.location.search);
-        const stock = params.get('stock');
-        const stockName = params.get('name');
-
-        if (stockName) {
-            document.getElementById('pageTitle').textContent = `${stockName} 뉴스`;
-        }
-
-        function goHome() {
-            window.location.href = 'index.html';
-        }
-
-        async function fetchNews() {
-            const loading = document.getElementById('loading');
-            const error = document.getElementById('error');
-            const newsList = document.getElementById('newsList');
+        try {
+            // 주소는 지금처럼 상대경로를 유지하는 것이 맞습니다.
+            const response = await fetch(`/api/news?stock=${stock}`);
+            const data = await response.json();
             
-            loading.style.display = 'block';
-            error.style.display = 'none';
-            newsList.innerHTML = '';
-            
-            try {
-                const response = await fetch(`/api/news?stock=${stock}`);
-                const data = await response.json();
-                
-                if (data.error) {
-                    error.textContent = '❌ 오류: ' + data.error;
-                    error.style.display = 'block';
-                    loading.style.display = 'none';
-                    return;
-                }
-                
-                if (data.news && data.news.length > 0) {
-                    newsList.innerHTML = data.news.map((item, index) => `
-                        <div class="news-item">
-                            <div class="news-date">📅 ${item.publishedAt}</div>
-                            <div class="news-title">${item.title}</div>
-                            <div class="news-source">📰 ${item.source}</div>
-                            <div class="news-content">
-                                ${item.content}
-                            </div>
-                            <div class="analysis">
-                                <div class="analysis-label">🤖 AI 분석:</div>
-                                <div class="analysis-text">${item.analysis}</div>
-                                <div class="importance">
-                                    중요도: ${item.importance}/5 ⭐
-                                </div>
-                            </div>
-                        </div>
-                    `).join('');
-                } else {
-                    newsList.innerHTML = '<div class="empty">뉴스가 없습니다.</div>';
-                }
-                
-            } catch (err) {
-                error.textContent = '❌ 오류 발생: ' + err.message;
+            if (!data.success) {
+                error.textContent = '❌ 오류: ' + (data.error || '뉴스를 가져오지 못했습니다.');
                 error.style.display = 'block';
+                loading.style.display = 'none';
+                return;
             }
             
-            loading.style.display = 'none';
+            if (data.news && data.news.length > 0) {
+                newsList.innerHTML = data.news.map((item) => `
+                    <div class="news-item">
+                        <div class="news-date">📅 ${item.publishedAt}</div>
+                        <div class="news-title"><a href="${item.url}" target="_blank" style="text-decoration:none; color:inherit;">${item.title}</a></div>
+                        <div class="news-source">📰 ${item.source}</div>
+                        <div class="news-content">
+                            ${item.content}
+                        </div>
+                        <div class="analysis">
+                            <div class="analysis-label">🤖 AI 요약 및 분석:</div>
+                            <div class="analysis-text">${item.analysis}</div>
+                            <div class="importance">
+                                중요도: ${item.importance}/5 ⭐
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                newsList.innerHTML = '<div class="empty">최신 뉴스가 없습니다.</div>';
+            }
+            
+        } catch (err) {
+            error.textContent = '❌ 서버 연결 오류: ' + err.message;
+            error.style.display = 'block';
         }
-    </script>
-</body>
-</html>
+        
+        loading.style.display = 'none';
+    }
+</script>
