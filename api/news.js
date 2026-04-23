@@ -3,14 +3,9 @@ module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
 
   const stockParam = req.query.stock || 'palantir';
-  const newsApiKey = process.env.NEWS_API_KEY;
   const claudeApiKey = process.env.CLAUDE_API_KEY;
 
-  if (!newsApiKey || !claudeApiKey) {
-    return res.status(200).json({ success: false, news: [], error: 'API 키 없음' });
-  }
-
-  const queries = {
+  const tickers = {
     'palantir': 'PLTR',
     'iren': 'IREN',
     'ionq': 'IONQ',
@@ -25,17 +20,42 @@ module.exports = async (req, res) => {
   };
 
   try {
-    const q = queries[stockParam] || 'PLTR';
+    const ticker = tickers[stockParam] || 'PLTR';
     const stockName = stockNames[stockParam] || '팔란티어';
 
-    const newsUrl = `https://newsapi.org/v2/everything?q=${q}&sortBy=publishedAt&language=en&pageSize=5&apiKey=${newsApiKey}`;
-    const newsRes = await fetch(newsUrl);
-    const newsData = await newsRes.json();
-    const articles = newsData.articles || [];
+    // Yahoo Finance RSS 가져오기
+    const rssUrl = `https://finance.yahoo.com/rss/headline?s=${ticker}`;
+    const rssRes = await fetch(rssUrl);
+    const rssText = await rssRes.text();
 
+    // XML 파싱 (간단하게 정규식 사용)
+    const items = rssText.match(/<item>([\s\S]*?)<\/item>/g) || [];
+    
+    const articles = items.slice(0, 5).map(item => {
+      const title = (item.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/) || 
+                     item.match(/<title>(.*?)<\/title>/) || [])[1] || '';
+      const description = (item.match(/<description><!\[CDATA\[(.*?)\]\]><\/description>/) || 
+                           item.match(/<description>(.*?)<\/description>/) || [])[1] || '';
+      const link = (item.match(/<link>(.*?)<\/link>/) || [])[1] || '';
+      const pubDate = (item.match(/<pubDate>(.*?)<\/pubDate>/) || [])[1] || '';
+
+      return {
+        title: title.trim(),
+        description: description.replace(/<[^>]*>/g, '').trim(),
+        link: link.trim(),
+        pubDate: pubDate.trim()
+      };
+    });
+
+    if (articles.length === 0) {
+      return res.status(200).json({ success: false, news: [], error: '뉴스 없음' });
+    }
+
+    // Claude API로 번역 + 분석
     const news = await Promise.all(
       articles.map(async (article) => {
-        const originalText = article.description || article.content || '내용 없음';
+        const originalText = article.description || article.title || '내용 없음';
+
         try {
           const claudeRes = await fetch('https://api.anthropic.com/v1/messages', {
             method: 'POST',
@@ -75,18 +95,24 @@ module.exports = async (req, res) => {
             title: article.title,
             originalContent: originalText,
             analysis: analysis,
-            source: article.source.name,
-            publishedAt: new Date(article.publishedAt).toLocaleDateString('ko-KR'),
-            url: article.url
+            source: 'Yahoo Finance',
+            publishedAt: new Date(article.pubDate).toLocaleDateString('ko-KR', {
+              year: 'numeric',
+              month: '2-digit',
+              day: '2-digit',
+              hour: '2-digit',
+              minute: '2-digit'
+            }),
+            url: article.link
           };
         } catch (err) {
           return {
             title: article.title,
             originalContent: originalText,
             analysis: null,
-            source: article.source.name,
-            publishedAt: new Date(article.publishedAt).toLocaleDateString('ko-KR'),
-            url: article.url
+            source: 'Yahoo Finance',
+            publishedAt: new Date(article.pubDate).toLocaleDateString('ko-KR'),
+            url: article.link
           };
         }
       })
