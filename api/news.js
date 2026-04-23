@@ -3,8 +3,8 @@ import axios from 'axios';
 const stockMappings = {
   'palantir': { name: '팔란티어', queries: ['PLTR', 'Palantir'] },
   'iren': { name: '아이렌', queries: ['IREN', 'Iren'] },
-  'ionq': { name: 'IonQ', queries: ['IONQ', 'IonQ'] },
-  'biomarin': { name: 'BitMain Emergence Tech', queries: ['BMNR', 'BitMain'] }
+  'ionq': { name: '아이온큐', queries: ['IONQ', 'IonQ'] },
+  'biomarin': { name: '비트마인', queries: ['BMNR', 'BitMain'] }
 };
 
 export default async function handler(req, res) {
