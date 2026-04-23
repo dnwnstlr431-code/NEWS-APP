@@ -96,11 +96,13 @@ module.exports = async (req, res) => {
             originalContent: originalText,
             analysis: analysis,
             source: 'Yahoo Finance',
-            publishedAt: ( => {
-            const d = new Date(article.pubDate);
-            return `${d.getFullYear()}. ${String(d.getMonth()+1).padStart(2,'0')}. ${String(d.getDate()).padStart(2,'0')}. ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+            publishedAt: new Date(article.pubDate).toLocaleDateString('ko-KR', {
+              year: 'numeric',
+              month: '2-digit',
+              day: '2-digit',
+              hour: '2-digit',
+              minute: '2-digit'
             }),
-    
             url: article.link
           };
         } catch (err) {
