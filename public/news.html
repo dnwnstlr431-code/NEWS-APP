@@ -127,4 +127,176 @@
         
         .news-item:hover {
             background: #ecf0f1;
-            box-shadow: 0
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.2);
+        }
+        
+        .news-date {
+            font-size: 13px;
+            font-weight: 700;
+            color: #e74c3c;
+            margin-bottom: 10px;
+        }
+        
+        .news-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 12px;
+            line-height: 1.5;
+        }
+
+        .news-title a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .news-title a:hover {
+            color: #3498db;
+        }
+        
+        .news-source {
+            font-size: 12px;
+            color: #95a5a6;
+            margin-bottom: 15px;
+        }
+        
+        .analysis {
+            background: white;
+            padding: 18px;
+            border-radius: 6px;
+            margin-top: 15px;
+            border-left: 3px solid #9b59b6;
+        }
+        
+        .analysis-label {
+            font-weight: 700;
+            color: #9b59b6;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .analysis-text {
+            color: #333;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+        
+        .importance {
+            display: inline-block;
+            background: #f39c12;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 12px;
+        }
+        
+        .error {
+            color: #c0392b;
+            text-align: center;
+            padding: 25px;
+            background: #fadbd8;
+            border-radius: 8px;
+            display: none;
+        }
+        
+        .empty {
+            text-align: center;
+            color: #95a5a6;
+            padding: 60px 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-left">
+                <a href="https://www.youtube.com/@투자의정석-z2o" target="_blank" class="youtube-link">
+                    🎬 투자의정석
+                </a>
+                <h1 id="pageTitle">뉴스 목록</h1>
+            </div>
+            <button class="back-btn" onclick="goHome()">← 돌아가기</button>
+        </div>
+        
+        <div class="button-group">
+            <button class="refresh-btn" id="refreshBtn" onclick="fetchNews()">🔄 뉴스 갱신</button>
+        </div>
+        
+        <div class="loading" id="loading">
+            ⏳ AI가 뉴스를 분석하고 있습니다. 잠시만 기다려주세요...
+        </div>
+        
+        <div class="error" id="error"></div>
+        
+        <div id="newsList">
+            <div class="empty">
+                "뉴스 갱신" 버튼을 클릭하여 최신 분석 결과를 확인하세요!
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const stock = params.get('stock') || 'palantir';
+        const stockName = params.get('name') || '팔란티어';
+
+        // 페이지 제목 설정
+        document.getElementById('pageTitle').textContent = `${stockName} 뉴스 분석`;
+
+        function goHome() {
+            window.location.href = 'index.html';
+        }
+
+        async function fetchNews() {
+            const loading = document.getElementById('loading');
+            const error = document.getElementById('error');
+            const newsList = document.getElementById('newsList');
+            const refreshBtn = document.getElementById('refreshBtn');
+            
+            loading.style.display = 'block';
+            error.style.display = 'none';
+            refreshBtn.disabled = true;
+            
+            try {
+                // 핵심: 상대 경로를 사용하여 Vercel 서버리스 함수를 호출합니다.
+                const response = await fetch(`/api/news?stock=${stock}`);
+                
+                if (!response.ok) {
+                    throw new Error(`서버 오류 (상태 코드: ${response.status})`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.success && data.news && data.news.length > 0) {
+                    newsList.innerHTML = data.news.map(item => `
+                        <div class="news-item">
+                            <div class="news-date">📅 ${item.publishedAt || '날짜 정보 없음'}</div>
+                            <div class="news-title">
+                                <a href="${item.url}" target="_blank"><strong>${item.title}</strong></a>
+                            </div>
+                            <div class="news-source">출처: ${item.source}</div>
+                            <div class="analysis">
+                                <div class="analysis-label">🤖 AI 분석 요약:</div>
+                                <div class="analysis-text">${item.analysis || '분석 내용을 가져오지 못했습니다.'}</div>
+                                <div class="importance">중요도: ${item.importance || 1}/5 ⭐</div>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    newsList.innerHTML = '<div class="empty">가져올 뉴스가 없거나 분석 중 오류가 발생했습니다.</div>';
+                    if(data.error) throw new Error(data.error);
+                }
+            } catch (err) {
+                console.error("Error fetching news:", err);
+                error.textContent = '❌ 오류 발생: ' + err.message;
+                error.style.display = 'block';
+            } finally {
+                loading.style.display = 'none';
+                refreshBtn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
