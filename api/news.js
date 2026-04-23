@@ -1,6 +1,4 @@
-const axios = require('axios');
-
-module.exports = async (req, res) => {
+export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -23,19 +21,11 @@ module.exports = async (req, res) => {
     }
 
     // NewsAPI에서 뉴스 가져오기
-    const newsResponse = await axios.get('https://newsapi.org/v2/everything', {
-      params: {
-        q: stockInfo.queries.join(' OR '),
-        sortBy: 'publishedAt',
-        language: 'en',
-        pageSize: 5
-      },
-      headers: {
-        'X-API-Key': newsApiKey
-      }
-    });
-
-    const articles = newsResponse.data.articles || [];
+    const newsUrl = `https://newsapi.org/v2/everything?q=${encodeURIComponent(stockInfo.queries.join(' OR '))}&sortBy=publishedAt&language=en&pageSize=5&apiKey=${newsApiKey}`;
+    
+    const newsResponse = await fetch(newsUrl);
+    const newsData = await newsResponse.json();
+    const articles = newsData.articles || [];
     
     const claudeApiKey = process.env.CLAUDE_API_KEY;
     if (!claudeApiKey) {
@@ -48,38 +38,43 @@ module.exports = async (req, res) => {
         try {
           const newsText = article.description || article.content || '내용 없음';
           
-          const analysisPrompt = `다음 뉴스를 분석해줄래?
+          const analysisPrompt = `뉴스를 분석해줘.
 
 제목: ${article.title}
 내용: ${newsText}
 
-다음을 한국어로 답변해:
-1. 이 뉴스를 한글로 요약 (2-3문장)
+이걸 한국어로:
+1. 뉴스 요약 (2-3문장)
 2. ${stockInfo.name} 투자자에게 긍정/부정 영향
-3. 한 문장으로 핵심`;
+3. 핵심 요약`;
 
-          const analysisResponse = await axios.post(
-            'https://api.anthropic.com/v1/messages',
-            {
+          const response = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: {
+              'x-api-key': claudeApiKey,
+              'anthropic-version': '2023-06-01',
+              'content-type': 'application/json'
+            },
+            body: JSON.stringify({
               model: 'claude-opus-4-20250805',
-              max_tokens: 300,
+              max_tokens: 400,
               messages: [
                 {
                   role: 'user',
                   content: analysisPrompt
                 }
               ]
-            },
-            {
-              headers: {
-                'x-api-key': claudeApiKey,
-                'anthropic-version': '2023-06-01',
-                'content-type': 'application/json'
-              }
-            }
-          );
+            })
+          });
 
-          const analysis = analysisResponse.data.content?.[0]?.text || '분석 실패';
+          const data = await response.json();
+          
+          if (!response.ok) {
+            console.error('Claude API 에러:', data);
+            throw new Error(data.error?.message || '분석 실패');
+          }
+
+          const analysis = data.content?.[0]?.text || '분석 실패';
 
           return {
             title: article.title,
@@ -95,7 +90,7 @@ module.exports = async (req, res) => {
             url: article.url
           };
         } catch (error) {
-          console.error('분석 에러:', error.message);
+          console.error('뉴스 분석 에러:', error.message);
           return {
             title: article.title,
             content: article.description || '내용 없음',
@@ -115,9 +110,9 @@ module.exports = async (req, res) => {
     });
 
   } catch (error) {
-    console.error('전체 에러:', error.message);
+    console.error('에러:', error.message);
     return res.status(500).json({
       error: '뉴스 처리 실패: ' + error.message
     });
   }
-};
+}
