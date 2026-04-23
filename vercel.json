@@ -1,4 +1,4 @@
 {
-  "buildCommand": "echo 'Build complete'",
-  "outputDirectory": "public"
+  "buildCommand": "exit 0",
+  "outputDirectory": "."
 }
