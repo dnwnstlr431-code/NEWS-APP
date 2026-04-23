@@ -193,9 +193,14 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1 id="pageTitle">뉴스</h1>
-            <button class="back-btn" onclick="goHome()">← 돌아가기</button>
-        </div>
+    <div>
+        <a href="https://www.youtube.com/@투자의정석-z2o" target="_blank" class="youtube-link">
+            🎬 투자의정석
+        </a>
+        <h1 id="pageTitle">뉴스</h1>
+    </div>
+    <button class="back-btn" onclick="goHome()">← 돌아가기</button>
+</div>
         
         <div class="button-group">
             <button class="refresh-btn" onclick="fetchNews()">🔄 뉴스 갱신</button>
@@ -208,6 +213,22 @@
         <div class="error" id="error"></div>
         
         <div id="newsList">
+            
+            .youtube-link {
+    display: inline-block;
+    font-size: 12px;
+    color: #7f8c8d;
+    text-decoration: none;
+    transition: 0.3s;
+    padding: 5px 8px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+}
+
+.youtube-link:hover {
+    color: #e74c3c;
+    background: rgba(231, 76, 60, 0.05);
+}
             <div class="empty">
                 "뉴스 갱신" 버튼을 클릭해서 최신 뉴스를 확인하세요!
             </div>
