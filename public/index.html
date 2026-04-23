@@ -135,9 +135,14 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>📊 실시간 미국주식 뉴스</h1>
-            <p class="subtitle">종목을 선택하면 최신 뉴스를 확인할 수 있습니다</p>
-        </div>
+    <div class="header-top">
+        <a href="https://www.youtube.com/@투자의정석-z2o" target="_blank" class="youtube-link">
+            🎬 투자의정석
+        </a>
+    </div>
+    <h1>📊 실시간 미국주식 뉴스</h1>
+    <p class="subtitle">종목을 선택하면 최신 뉴스를 확인할 수 있습니다</p>
+</div>
         
         <div class="stocks-grid">
             <a href="news.html?stock=palantir&name=팔란티어" class="stock-card pltr">
@@ -160,7 +165,25 @@
             <div class="stock-name">비트마인</div>
             </a>
         </div>
-        
+
+        .header-top {
+    margin-bottom: 15px;
+}
+
+.youtube-link {
+    display: inline-block;
+    font-size: 13px;
+    color: #7f8c8d;
+    text-decoration: none;
+    transition: 0.3s;
+    padding: 5px 10px;
+    border-radius: 4px;
+}
+
+.youtube-link:hover {
+    color: #e74c3c;
+    background: rgba(231, 76, 60, 0.05);
+}
         <div class="footer">
             💡 최신 뉴스는 자동으로 수집되며, Claude AI가 분석합니다.
         </div>
