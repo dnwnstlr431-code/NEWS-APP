@@ -1,0 +1,12 @@
+{
+  "name": "NEWS-APP",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "node api/news.js",
+    "start": "node api/news.js"
+  },
+  "dependencies": {
+    "axios": "^1.6.0"
+  }
+}
