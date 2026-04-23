@@ -4,26 +4,36 @@ module.exports = async (req, res) => {
   const claudeApiKey = process.env.CLAUDE_API_KEY;
 
   if (!newsApiKey || !claudeApiKey) {
-    return res.json({ success: false, news: [] });
+    return res.json({ success: false, news: [], error: 'API 키 없음' });
   }
 
-  try {
-    const queries = {
-      'palantir': 'PLTR',
-      'iren': 'IREN',
-      'ionq': 'IONQ',
-      'biomarin': 'BMNR'
-    };
+  const queries = {
+    'palantir': 'PLTR',
+    'iren': 'IREN',
+    'ionq': 'IONQ',
+    'biomarin': 'BMNR'
+  };
 
+  const stockNames = {
+    'palantir': '팔란티어',
+    'iren': '아이렌',
+    'ionq': '아이온큐',
+    'biomarin': '비트마인'
+  };
+
+  try {
     const q = queries[stockParam] || 'PLTR';
+    const stockName = stockNames[stockParam] || '팔란티어';
+
     const newsUrl = `https://newsapi.org/v2/everything?q=${q}&sortBy=publishedAt&language=en&pageSize=5&apiKey=${newsApiKey}`;
-    
     const newsRes = await fetch(newsUrl);
     const newsData = await newsRes.json();
     const articles = newsData.articles || [];
 
     const news = await Promise.all(
       articles.map(async (article) => {
+        const originalText = article.description || article.content || '내용 없음';
+
         try {
           const claudeRes = await fetch('https://api.anthropic.com/v1/messages', {
             method: 'POST',
@@ -33,39 +43,11 @@ module.exports = async (req, res) => {
               'content-type': 'application/json'
             },
             body: JSON.stringify({
-              model: 'claude-haiku-4-5-20250514',
-              max_tokens: 300,
+              model: 'claude-haiku-4-5-20251001',
+              max_tokens: 500,
               messages: [{
                 role: 'user',
-                content: `다음 뉴스를 한국어로 2-3문장으로 번역해줘:\n\n${article.description || article.content || '내용 없음'}`
-              }]
-            })
-          });
+                content: `다음 뉴스를 분석해줘.
 
-          const claudeData = await claudeRes.json();
-          const translation = claudeData.content?.[0]?.text || article.description || '번역 실패';
-
-          return {
-            title: article.title,
-            content: translation,
-            source: article.source.name,
-            publishedAt: new Date(article.publishedAt).toLocaleDateString('ko-KR'),
-            url: article.url
-          };
-        } catch (err) {
-          return {
-            title: article.title,
-            content: article.description || '내용 없음',
-            source: article.source.name,
-            publishedAt: new Date(article.publishedAt).toLocaleDateString('ko-KR'),
-            url: article.url
-          };
-        }
-      })
-    );
-
-    return res.json({ success: true, news });
-  } catch (error) {
-    return res.json({ success: false, news: [], error: error.message });
-  }
-};
+제목: ${article.title}
+내용: ${originalText}
