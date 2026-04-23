@@ -152,12 +152,30 @@
             color: #95a5a6;
             margin-bottom: 15px;
         }
-        
+
         .news-content {
             color: #555;
             line-height: 1.7;
             margin-bottom: 18px;
             font-size: 15px;
+        }
+
+        .analysis-box {
+            background: #f0f4ff;
+            border-left: 3px solid #9b59b6;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+            font-size: 14px;
+            line-height: 1.7;
+            color: #444;
+        }
+
+        .analysis-section-title {
+            font-weight: 700;
+            color: #9b59b6;
+            margin-top: 10px;
+            margin-bottom: 5px;
         }
         
         .news-link {
@@ -215,7 +233,7 @@
         </div>
         
         <div class="loading" id="loading">
-            ⏳ 뉴스를 가져오고 번역하는 중입니다...
+            ⏳ 뉴스를 가져오고 AI가 분석하는 중입니다...
         </div>
         
         <div class="error" id="error"></div>
@@ -253,7 +271,7 @@
                 const response = await fetch(`/api/news?stock=${stock}`);
                 const data = await response.json();
                 
-                if (data.error || !data.success) {
+                if (!data.success) {
                     error.textContent = '❌ 뉴스를 불러올 수 없습니다.';
                     error.style.display = 'block';
                     loading.style.display = 'none';
@@ -261,14 +279,22 @@
                 }
                 
                 if (data.news && data.news.length > 0) {
-                    newsList.innerHTML = data.news.map((item, index) => `
+                    newsList.innerHTML = data.news.map((item) => `
                         <div class="news-item">
                             <div class="news-date">📅 ${item.publishedAt}</div>
                             <div class="news-title">${item.title}</div>
                             <div class="news-source">📰 ${item.source}</div>
-                            <div class="news-content">
-                                ${item.content}
+                            
+                            ${item.analysis ? `
+                            <div class="analysis-box">
+                                ${item.analysis
+                                    .replace(/\[([^\]]+)\]/g, '<div class="analysis-section-title">[$1]</div>')
+                                    .replace(/\n/g, '<br>')}
                             </div>
+                            ` : `
+                            <div class="news-content">${item.originalContent}</div>
+                            `}
+                            
                             <a href="${item.url}" target="_blank" class="news-link">
                                 🔗 원문 보기
                             </a>
