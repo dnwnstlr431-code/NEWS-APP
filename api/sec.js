@@ -1,3 +1,10 @@
+const { Redis } = require('@upstash/redis');
+
+const redis = new Redis({
+  url: process.env.UPSTASH_REDIS_REST_URL,
+  token: process.env.UPSTASH_REDIS_REST_TOKEN,
+});
+
 module.exports = async (req, res) => {
   res.setHeader('Content-Type', 'application/json');
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -38,6 +45,18 @@ module.exports = async (req, res) => {
   };
 
   try {
+    // ✅ 캐시 확인
+    const cached = await redis.get(`sec:${stockParam}`);
+    if (cached) {
+      const data = typeof cached === 'string' ? JSON.parse(cached) : cached;
+      return res.status(200).json({
+        success: true,
+        sec: data.sec,
+        updatedAt: data.updatedAt,
+        fromCache: true
+      });
+    }
+
     const ticker = tickers[stockParam] || 'PLTR';
     const stockName = stockNames[stockParam] || '팔란티어';
 
@@ -56,7 +75,7 @@ module.exports = async (req, res) => {
       return res.status(200).json({ success: false, sec: [], error: '공시 없음' });
     }
 
-    // Form 4 중복 제거 (같은 날짜 같은 유형은 1개만)
+    // Form 4 중복 제거
     const seen = new Set();
     const deduped = filingsData.filter(filing => {
       const key = `${filing.form}-${filing.filedDate}`;
@@ -66,8 +85,6 @@ module.exports = async (req, res) => {
     });
 
     const recentFilings = deduped.slice(0, 8);
-
-    // 이미 사용된 내부자 거래 추적
     const usedTxIndices = new Set();
 
     const secFilings = await Promise.all(
@@ -79,16 +96,13 @@ module.exports = async (req, res) => {
 
         let detailInfo = '';
 
-        // Form 4, 3: 내부자 거래 상세 정보
         if (formType === '4' || formType === '3') {
           const filingDateStr = filingDate ? filingDate.substring(0, 10) : '';
-
           const matchIdx = insiderTransactions.findIndex((tx, idx) => {
             if (usedTxIndices.has(idx)) return false;
             const txDate = (tx.transactionDate || tx.filingDate || '').substring(0, 10);
             return txDate === filingDateStr;
           });
-
           if (matchIdx !== -1) {
             usedTxIndices.add(matchIdx);
             const tx = insiderTransactions[matchIdx];
@@ -101,7 +115,6 @@ module.exports = async (req, res) => {
           }
         }
 
-        // Form 144: 내부자 매도 예고
         if (formType === '144') {
           const filingDateStr = filingDate ? filingDate.substring(0, 10) : '';
           const matchIdx = insiderTransactions.findIndex((tx, idx) => {
@@ -109,7 +122,6 @@ module.exports = async (req, res) => {
             const txDate = (tx.transactionDate || tx.filingDate || '').substring(0, 10);
             return txDate.startsWith(filingDateStr.substring(0, 7));
           });
-
           if (matchIdx !== -1) {
             usedTxIndices.add(matchIdx);
             const tx = insiderTransactions[matchIdx];
@@ -124,120 +136,17 @@ module.exports = async (req, res) => {
           let prompt = '';
 
           if (formType === '4' || formType === '3') {
-            prompt = `회사: ${stockName}
-공시 유형: ${formType} (${formDesc})
-제출일: ${filingDate}
-${detailInfo ? `\n거래 상세:\n${detailInfo}` : ''}
-
-아래 형식으로 한국어로 답변해줘:
-
-[공시 설명]
-Form ${formType}이 무엇인지 1문장 설명
-
-[거래 내역]
-${detailInfo ? '위 거래 상세 정보를 바탕으로 거래자, 매수/매도, 수량, 가격을 구체적으로 설명' : '거래 내역 정보 없음'}
-
-[투자자 주목 포인트]
-이 거래가 ${stockName} 투자자에게 의미하는 바 2문장
-
-[투자 영향]
-긍정 / 부정 / 중립 중 하나와 이유 한 줄`;
-
+            prompt = `회사: ${stockName}\n공시 유형: ${formType} (${formDesc})\n제출일: ${filingDate}\n${detailInfo ? `\n거래 상세:\n${detailInfo}` : ''}\n\n아래 형식으로 한국어로 답변해줘:\n\n[공시 설명]\nForm ${formType}이 무엇인지 1문장 설명\n\n[거래 내역]\n${detailInfo ? '위 거래 상세 정보를 바탕으로 거래자, 매수/매도, 수량, 가격을 구체적으로 설명' : '거래 내역 정보 없음'}\n\n[투자자 주목 포인트]\n이 거래가 ${stockName} 투자자에게 의미하는 바 2문장\n\n[투자 영향]\n긍정 / 부정 / 중립 중 하나와 이유 한 줄`;
           } else if (formType === '144') {
-            prompt = `회사: ${stockName}
-공시 유형: ${formType} (${formDesc})
-제출일: ${filingDate}
-${detailInfo ? `\n매도 예고 상세:\n${detailInfo}` : ''}
-
-아래 형식으로 한국어로 답변해줘:
-
-[공시 설명]
-Form 144가 무엇인지 1문장 설명
-
-[매도 예고 내역]
-${detailInfo ? '위 정보를 바탕으로 누가 얼마나 팔 예정인지 구체적으로 설명' : '상세 내역 없음'}
-
-[투자자 주목 포인트]
-이 매도 예고가 ${stockName} 투자자에게 미치는 영향 2문장
-
-[투자 영향]
-긍정 / 부정 / 중립 중 하나와 이유 한 줄`;
-
+            prompt = `회사: ${stockName}\n공시 유형: ${formType} (${formDesc})\n제출일: ${filingDate}\n${detailInfo ? `\n매도 예고 상세:\n${detailInfo}` : ''}\n\n아래 형식으로 한국어로 답변해줘:\n\n[공시 설명]\nForm 144가 무엇인지 1문장 설명\n\n[매도 예고 내역]\n${detailInfo ? '위 정보를 바탕으로 누가 얼마나 팔 예정인지 구체적으로 설명' : '상세 내역 없음'}\n\n[투자자 주목 포인트]\n이 매도 예고가 ${stockName} 투자자에게 미치는 영향 2문장\n\n[투자 영향]\n긍정 / 부정 / 중립 중 하나와 이유 한 줄`;
           } else if (formType === '8-K' || formType === '6-K') {
-            prompt = `회사: ${stockName}
-공시 유형: ${formType} (${formDesc})
-제출일: ${filingDate}
-
-아래 형식으로 한국어로 답변해줘:
-
-[공시 설명]
-8-K 공시가 무엇인지 1문장 설명
-
-[주요 내용]
-8-K 공시의 일반적인 중요성과 ${stockName}에서 자주 발생하는 8-K 유형 설명
-
-[투자자 주목 포인트]
-이 공시가 ${stockName} 투자자에게 중요한 이유 2문장
-
-[투자 영향]
-중립 - 원문 확인 필요`;
-
+            prompt = `회사: ${stockName}\n공시 유형: ${formType} (${formDesc})\n제출일: ${filingDate}\n\n아래 형식으로 한국어로 답변해줘:\n\n[공시 설명]\n8-K 공시가 무엇인지 1문장 설명\n\n[주요 내용]\n8-K 공시의 일반적인 중요성과 ${stockName}에서 자주 발생하는 8-K 유형 설명\n\n[투자자 주목 포인트]\n이 공시가 ${stockName} 투자자에게 중요한 이유 2문장\n\n[투자 영향]\n중립 - 원문 확인 필요`;
           } else if (formType === '10-Q') {
-            prompt = `회사: ${stockName}
-공시 유형: ${formType} (${formDesc})
-제출일: ${filingDate}
-
-아래 형식으로 한국어로 답변해줘:
-
-[공시 설명]
-10-Q 분기 실적 보고서가 무엇인지 1문장 설명
-
-[주요 내용]
-분기 실적 보고서의 핵심 구성요소와 투자자가 주목해야 할 지표 설명
-
-[투자자 주목 포인트]
-${stockName}의 분기 실적을 볼 때 중요한 포인트 2문장
-
-[투자 영향]
-중립 - 실제 수치 확인 필요`;
-
+            prompt = `회사: ${stockName}\n공시 유형: ${formType} (${formDesc})\n제출일: ${filingDate}\n\n아래 형식으로 한국어로 답변해줘:\n\n[공시 설명]\n10-Q 분기 실적 보고서가 무엇인지 1문장 설명\n\n[주요 내용]\n분기 실적 보고서의 핵심 구성요소와 투자자가 주목해야 할 지표 설명\n\n[투자자 주목 포인트]\n${stockName}의 분기 실적을 볼 때 중요한 포인트 2문장\n\n[투자 영향]\n중립 - 실제 수치 확인 필요`;
           } else if (formType === '10-K') {
-            prompt = `회사: ${stockName}
-공시 유형: ${formType} (${formDesc})
-제출일: ${filingDate}
-
-아래 형식으로 한국어로 답변해줘:
-
-[공시 설명]
-10-K 연간 실적 보고서가 무엇인지 1문장 설명
-
-[주요 내용]
-연간 실적 보고서에서 투자자가 반드시 확인해야 할 핵심 지표 설명
-
-[투자자 주목 포인트]
-${stockName}의 연간 실적을 평가할 때 중요한 포인트 2문장
-
-[투자 영향]
-중립 - 실제 수치 확인 필요`;
-
+            prompt = `회사: ${stockName}\n공시 유형: ${formType} (${formDesc})\n제출일: ${filingDate}\n\n아래 형식으로 한국어로 답변해줘:\n\n[공시 설명]\n10-K 연간 실적 보고서가 무엇인지 1문장 설명\n\n[주요 내용]\n연간 실적 보고서에서 투자자가 반드시 확인해야 할 핵심 지표 설명\n\n[투자자 주목 포인트]\n${stockName}의 연간 실적을 평가할 때 중요한 포인트 2문장\n\n[투자 영향]\n중립 - 실제 수치 확인 필요`;
           } else {
-            prompt = `회사: ${stockName}
-공시 유형: ${formType} (${formDesc})
-제출일: ${filingDate}
-
-아래 형식으로 한국어로 답변해줘:
-
-[공시 설명]
-${formType} (${formDesc})가 무엇인지 1-2문장 설명
-
-[주요 내용]
-이 공시의 일반적인 의미와 투자자에게 중요한 이유 설명
-
-[투자자 주목 포인트]
-이 공시가 ${stockName} 투자자에게 중요한 이유 2문장
-
-[투자 영향]
-긍정 / 부정 / 중립 중 하나와 이유 한 줄`;
+            prompt = `회사: ${stockName}\n공시 유형: ${formType} (${formDesc})\n제출일: ${filingDate}\n\n아래 형식으로 한국어로 답변해줘:\n\n[공시 설명]\n${formType} (${formDesc})가 무엇인지 1-2문장 설명\n\n[주요 내용]\n이 공시의 일반적인 의미와 투자자에게 중요한 이유 설명\n\n[투자자 주목 포인트]\n이 공시가 ${stockName} 투자자에게 중요한 이유 2문장\n\n[투자 영향]\n긍정 / 부정 / 중립 중 하나와 이유 한 줄`;
           }
 
           const claudeRes = await fetch('https://api.anthropic.com/v1/messages', {
@@ -250,10 +159,7 @@ ${formType} (${formDesc})가 무엇인지 1-2문장 설명
             body: JSON.stringify({
               model: 'claude-haiku-4-5-20251001',
               max_tokens: 800,
-              messages: [{
-                role: 'user',
-                content: prompt
-              }]
+              messages: [{ role: 'user', content: prompt }]
             })
           });
 
@@ -264,12 +170,10 @@ ${formType} (${formDesc})가 무엇인지 1-2문장 설명
             form: formType,
             formDesc: formDesc,
             filingDate: filingDate ? new Date(filingDate).toLocaleDateString('ko-KR', {
-              year: 'numeric',
-              month: '2-digit',
-              day: '2-digit'
+              year: 'numeric', month: '2-digit', day: '2-digit'
             }) : '날짜 없음',
-            analysis: analysis,
-            url: url
+            analysis,
+            url
           };
         } catch (err) {
           return {
@@ -277,13 +181,22 @@ ${formType} (${formDesc})가 무엇인지 1-2문장 설명
             formDesc: formDesc,
             filingDate: filingDate ? new Date(filingDate).toLocaleDateString('ko-KR') : '날짜 없음',
             analysis: null,
-            url: url
+            url
           };
         }
       })
     );
 
-    return res.status(200).json({ success: true, sec: secFilings });
+    // ✅ Redis에 캐시 저장 (6시간)
+    const updatedAt = new Date().toISOString();
+    await redis.set(
+      `sec:${stockParam}`,
+      JSON.stringify({ sec: secFilings, updatedAt }),
+      { ex: 21600 }
+    );
+
+    return res.status(200).json({ success: true, sec: secFilings, updatedAt, fromCache: false });
+
   } catch (error) {
     return res.status(200).json({ success: false, sec: [], error: error.message });
   }
