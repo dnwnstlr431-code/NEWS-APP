@@ -56,7 +56,7 @@ module.exports = async (req, res) => {
         const formType = filing.form || '기타';
         const formDesc = formDescriptions[formType] || '기타 공시';
         const filingDate = filing.filedDate || filing.acceptedDate || '';
-        const url = filing.reportUrl || filing.filingUrl || `https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=${ticker}&type=${formType}&count=10`;
+        const url = `https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=${ticker}&type=${encodeURIComponent(formType)}&dateb=&owner=include&count=10&search_text=`;
 
         try {
           const claudeRes = await fetch('https://api.anthropic.com/v1/messages', {
