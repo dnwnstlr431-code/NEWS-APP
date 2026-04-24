@@ -442,59 +442,52 @@
                 const res = await fetch('/api/preview');
                 const data = await res.json();
                 if (!data.success) { showFeedError(); return; }
-                renderNewsFeed(data.preview);
-                renderSecFeed(data.preview);
+                // 이미 날짜순 정렬된 flat 배열
+                renderNewsFeed(data.news || []);
+                renderSecFeed(data.sec || []);
             } catch (e) { showFeedError(); }
         }
 
-        function renderNewsFeed(preview) {
+        function renderNewsFeed(items) {
             const container = document.getElementById('newsFeed');
-            const items = [];
-            Object.keys(stockInfo).forEach(stock => {
-                (preview[stock]?.news || []).forEach(item => {
-                    items.push({ stock, info: stockInfo[stock], ...item });
-                });
-            });
             if (items.length === 0) {
                 container.innerHTML = '<div class="feed-loading">뉴스 캐시 없음 — 잠시 후 다시 확인해주세요</div>';
                 return;
             }
-            container.innerHTML = items.map(item => `
-                <a class="feed-item" href="news.html?stock=${item.stock}&name=${item.info.name}">
-                    <span class="feed-badge ${item.info.badgeClass}">${item.info.ticker}</span>
+            container.innerHTML = items.map(item => {
+                const info = stockInfo[item.stock];
+                return `
+                <a class="feed-item" href="news.html?stock=${item.stock}&name=${info.name}">
+                    <span class="feed-badge ${info.badgeClass}">${item.ticker}</span>
                     <div class="feed-content">
                         <div class="feed-title">${item.title}</div>
-                        <div class="feed-sub">${item.info.name} · Yahoo Finance</div>
+                        <div class="feed-sub">${info.name} · Yahoo Finance</div>
                     </div>
                     <span class="feed-date">${formatDate(item.publishedAt)}</span>
                     <span class="feed-arrow">›</span>
-                </a>
-            `).join('');
+                </a>`;
+            }).join('');
         }
 
-        function renderSecFeed(preview) {
+        function renderSecFeed(items) {
             const container = document.getElementById('secFeed');
-            const items = [];
-            Object.keys(stockInfo).forEach(stock => {
-                (preview[stock]?.sec || []).forEach(item => {
-                    items.push({ stock, info: stockInfo[stock], ...item });
-                });
-            });
             if (items.length === 0) {
                 container.innerHTML = '<div class="feed-loading">SEC 캐시 없음 — 종목 클릭 시 자동 생성됩니다</div>';
                 return;
             }
-            container.innerHTML = items.map(item => `
-                <a class="feed-item" href="sec.html?stock=${item.stock}&name=${item.info.name}">
+            container.innerHTML = items.map(item => {
+                const info = stockInfo[item.stock];
+                return `
+                <a class="feed-item" href="sec.html?stock=${item.stock}&name=${info.name}">
                     <span class="feed-badge badge-sec">${item.form}</span>
                     <div class="feed-content">
                         <div class="feed-title">${item.formDesc}</div>
-                        <div class="feed-sub">${item.info.name} · SEC EDGAR</div>
+                        <div class="feed-sub">${info.name} · SEC EDGAR</div>
                     </div>
                     <span class="feed-date">${formatDate(item.filingDate)}</span>
                     <span class="feed-arrow">›</span>
-                </a>
-            `).join('');
+                </a>`;
+            }).join('');
         }
 
         function showFeedError() {
