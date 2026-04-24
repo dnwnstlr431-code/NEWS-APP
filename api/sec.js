@@ -37,48 +37,54 @@ module.exports = async (req, res) => {
   try {
     const cik = cikNumbers[stockParam] || cikNumbers['palantir'];
     const stockName = stockNames[stockParam] || '팔란티어';
-    const paddedCik = cik.padStart(10, '0');
 
-    const secUrl = `https://data.sec.gov/submissions/CIK${paddedCik}.json`;
+    // SEC RSS 피드 가져오기
+    const rssUrl = `https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=${cik}&type=&dateb=&owner=include&count=10&search_text=&output=atom`;
 
-    const secRes = await fetch(secUrl, {
+    const rssRes = await fetch(rssUrl, {
       headers: {
-        'User-Agent': 'InvestmentApp woojunsik@gmail.com',
-        'Accept': 'application/json'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'Accept': 'application/atom+xml, application/xml, text/xml, */*'
       }
     });
 
-    const contentType = secRes.headers.get('content-type') || '';
-    if (!secRes.ok || !contentType.includes('application/json')) {
-      return res.status(200).json({
-        success: false,
-        sec: [],
-        error: `SEC API 오류 (${secRes.status})`
-      });
+    const rssText = await rssRes.text();
+
+    // XML 파싱
+    const entries = rssText.match(/<entry>([\s\S]*?)<\/entry>/g) || [];
+
+    if (entries.length === 0) {
+      return res.status(200).json({ success: false, sec: [], error: 'SEC 공시를 가져올 수 없습니다.' });
     }
 
-    const secData = await secRes.json();
-    const filings = secData.filings?.recent;
+    const filings = entries.slice(0, 8).map(entry => {
+      const title = (entry.match(/<title[^>]*>([\s\S]*?)<\/title>/) || [])[1] || '';
+      const updated = (entry.match(/<updated>([\s\S]*?)<\/updated>/) || [])[1] || '';
+      const link = (entry.match(/href="([^"]*)"/) || [])[1] || '';
+      const summary = (entry.match(/<summary[^>]*>([\s\S]*?)<\/summary>/) || [])[1] || '';
 
-    if (!filings) {
-      return res.status(200).json({ success: false, sec: [], error: '공시 없음' });
-    }
+      // 공시 유형 추출 (예: "8-K")
+      const formMatch = title.match(/^([^\s]+)/);
+      const formType = formMatch ? formMatch[1].trim() : '기타';
+      const formDesc = formDescriptions[formType] || '기타 공시';
 
-    const recentFilings = [];
-    for (let i = 0; i < Math.min(8, filings.form.length); i++) {
-      recentFilings.push({
-        form: filings.form[i],
-        filingDate: filings.filingDate[i],
-        accessionNumber: filings.accessionNumber[i]
-      });
-    }
+      return {
+        formType,
+        formDesc,
+        title: title.replace(/<[^>]*>/g, '').trim(),
+        filingDate: updated ? new Date(updated).toLocaleDateString('ko-KR', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit'
+        }) : '날짜 없음',
+        link: link || `https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=${cik}&type=&count=10`,
+        summary: summary.replace(/<[^>]*>/g, '').trim()
+      };
+    });
 
+    // Claude로 분석
     const secFilings = await Promise.all(
-      recentFilings.map(async (filing) => {
-        const formType = filing.form;
-        const formDesc = formDescriptions[formType] || '기타 공시';
-        const secViewUrl = `https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=${cik}&type=${encodeURIComponent(formType)}&dateb=&owner=include&count=10`;
-
+      filings.map(async (filing) => {
         try {
           const claudeRes = await fetch('https://api.anthropic.com/v1/messages', {
             method: 'POST',
@@ -95,13 +101,13 @@ module.exports = async (req, res) => {
                 content: `SEC 공시를 분석해줘.
 
 회사: ${stockName}
-공시 유형: ${formType} (${formDesc})
+공시 유형: ${filing.formType} (${filing.formDesc})
 제출일: ${filing.filingDate}
 
 아래 형식으로 한국어로 답변해줘:
 
 [공시 설명]
-${formType} (${formDesc})가 무엇인지 1-2문장으로 설명
+${filing.formType} (${filing.formDesc})가 무엇인지 1-2문장으로 설명
 
 [투자자 주목 포인트]
 이 공시가 ${stockName} 투자자에게 중요한 이유 2-3문장
@@ -116,23 +122,19 @@ ${formType} (${formDesc})가 무엇인지 1-2문장으로 설명
           const analysis = claudeData.content?.[0]?.text || null;
 
           return {
-            form: formType,
-            formDesc: formDesc,
-            filingDate: new Date(filing.filingDate).toLocaleDateString('ko-KR', {
-              year: 'numeric',
-              month: '2-digit',
-              day: '2-digit'
-            }),
+            form: filing.formType,
+            formDesc: filing.formDesc,
+            filingDate: filing.filingDate,
             analysis: analysis,
-            url: secViewUrl
+            url: filing.link
           };
         } catch (err) {
           return {
-            form: formType,
-            formDesc: formDesc,
-            filingDate: new Date(filing.filingDate).toLocaleDateString('ko-KR'),
+            form: filing.formType,
+            formDesc: filing.formDesc,
+            filingDate: filing.filingDate,
             analysis: null,
-            url: secViewUrl
+            url: filing.link
           };
         }
       })
