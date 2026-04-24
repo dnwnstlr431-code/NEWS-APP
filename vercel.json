@@ -6,10 +6,6 @@
       "use": "@vercel/node"
     },
     {
-      "src": "api/sec.js",
-      "use": "@vercel/node"
-    },
-    {
       "src": "api/cron.js",
       "use": "@vercel/node"
     },
@@ -22,10 +18,6 @@
     {
       "src": "/api/news",
       "dest": "/api/news.js"
-    },
-    {
-      "src": "/api/sec",
-      "dest": "/api/sec.js"
     },
     {
       "src": "/api/cron",
