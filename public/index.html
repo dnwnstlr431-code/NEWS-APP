@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>실시간 미국주식 뉴스</title>
+    <title>실시간 미국주식</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -37,7 +37,6 @@
             font-weight: 300;
         }
 
-        /* 탭 스타일 */
         .tabs {
             display: flex;
             justify-content: center;
@@ -81,7 +80,6 @@
             transform: translateY(-2px);
         }
 
-        /* 종목 카드 */
         .stocks-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -90,7 +88,6 @@
         }
 
         .stock-card {
-            background: white;
             padding: 35px;
             border-radius: 12px;
             cursor: pointer;
@@ -104,35 +101,52 @@
             border: 2px solid transparent;
         }
 
-        /* 뉴스 탭 카드 스타일 */
-        .stock-card.news-mode .stock-code { color: #3498db; }
-        .stock-card.news-mode:hover {
+        /* 뉴스 탭 카드 */
+        .stock-card.news-mode {
+            background: white;
+        }
+
+        .stock-card.news-mode.pltr .stock-code { color: #3498db; }
+        .stock-card.news-mode.pltr:hover {
             border-color: #3498db;
             transform: translateY(-8px);
             box-shadow: 0 12px 30px rgba(52,152,219,0.2);
         }
 
         .stock-card.news-mode.iren .stock-code { color: #e74c3c; }
-        .stock-card.news-mode.iren:hover { border-color: #e74c3c; }
-
-        .stock-card.news-mode.ionq .stock-code { color: #9b59b6; }
-        .stock-card.news-mode.ionq:hover { border-color: #9b59b6; }
-
-        .stock-card.news-mode.bmnr .stock-code { color: #27ae60; }
-        .stock-card.news-mode.bmnr:hover { border-color: #27ae60; }
-
-        /* 공시 탭 카드 스타일 */
-        .stock-card.sec-mode {
-            background: rgba(96, 125, 139, 0.05);
+        .stock-card.news-mode.iren:hover {
+            border-color: #e74c3c;
+            transform: translateY(-8px);
+            box-shadow: 0 12px 30px rgba(231,76,60,0.2);
         }
 
-        .stock-card.sec-mode .stock-code { color: #607D8B; }
-        .stock-card.sec-mode .stock-name { color: #546E7A; }
+        .stock-card.news-mode.ionq .stock-code { color: #9b59b6; }
+        .stock-card.news-mode.ionq:hover {
+            border-color: #9b59b6;
+            transform: translateY(-8px);
+            box-shadow: 0 12px 30px rgba(155,89,182,0.2);
+        }
+
+        .stock-card.news-mode.bmnr .stock-code { color: #27ae60; }
+        .stock-card.news-mode.bmnr:hover {
+            border-color: #27ae60;
+            transform: translateY(-8px);
+            box-shadow: 0 12px 30px rgba(39,174,96,0.2);
+        }
+
+        /* 공시 탭 카드 */
+        .stock-card.sec-mode {
+            background: #E8EEF2;
+            border: 2px solid #B0BEC5;
+        }
+
+        .stock-card.sec-mode .stock-code { color: #37474F; }
+        .stock-card.sec-mode .stock-name { color: #37474F; }
         .stock-card.sec-mode:hover {
             border-color: #607D8B;
-            background: rgba(96, 125, 139, 0.12);
+            background: #CFD8DC;
             transform: translateY(-8px);
-            box-shadow: 0 12px 30px rgba(96,125,139,0.2);
+            box-shadow: 0 12px 30px rgba(96,125,139,0.3);
         }
 
         .stock-code {
@@ -168,7 +182,6 @@
             <p class="subtitle">종목을 선택하면 최신 정보를 확인할 수 있습니다</p>
         </div>
 
-        <!-- 탭 버튼 -->
         <div class="tabs">
             <button class="tab-btn news active" onclick="switchTab('news')">
                 📰 뉴스
@@ -178,23 +191,19 @@
             </button>
         </div>
 
-        <!-- 종목 카드 -->
-        <div class="stocks-grid" id="stocksGrid">
+        <div class="stocks-grid">
             <a href="news.html?stock=palantir&name=팔란티어" class="stock-card news-mode pltr" id="card-palantir">
                 <div class="stock-code">PLTR</div>
                 <div class="stock-name">팔란티어</div>
             </a>
-
             <a href="news.html?stock=iren&name=아이렌" class="stock-card news-mode iren" id="card-iren">
                 <div class="stock-code">IREN</div>
                 <div class="stock-name">아이렌</div>
             </a>
-
             <a href="news.html?stock=ionq&name=아이온큐" class="stock-card news-mode ionq" id="card-ionq">
                 <div class="stock-code">IONQ</div>
                 <div class="stock-name">아이온큐</div>
             </a>
-
             <a href="news.html?stock=biomarin&name=비트마인" class="stock-card news-mode bmnr" id="card-biomarin">
                 <div class="stock-code">BMNR</div>
                 <div class="stock-name">비트마인</div>
@@ -212,20 +221,19 @@
         function switchTab(tab) {
             currentTab = tab;
 
-            // 탭 버튼 스타일 변경
             document.querySelector('.tab-btn.news').classList.toggle('active', tab === 'news');
             document.querySelector('.tab-btn.sec').classList.toggle('active', tab === 'sec');
 
-            // 카드 링크 + 스타일 변경
             const cards = document.querySelectorAll('.stock-card');
+            const names = {
+                'palantir': '팔란티어',
+                'iren': '아이렌',
+                'ionq': '아이온큐',
+                'biomarin': '비트마인'
+            };
+
             cards.forEach(card => {
                 const stock = card.id.replace('card-', '');
-                const names = {
-                    'palantir': '팔란티어',
-                    'iren': '아이렌',
-                    'ionq': '아이온큐',
-                    'biomarin': '비트마인'
-                };
 
                 if (tab === 'news') {
                     card.href = `news.html?stock=${stock}&name=${names[stock]}`;
