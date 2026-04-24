@@ -56,7 +56,16 @@ module.exports = async (req, res) => {
       return res.status(200).json({ success: false, sec: [], error: '공시 없음' });
     }
 
-    const recentFilings = filingsData.slice(0, 8);
+    // Form 4 중복 제거 (같은 날짜 Form 4는 1개만)
+    const seen = new Set();
+    const deduped = finnhubData.filter(filing => {
+    const key = `${filing.form}-${filing.filedDate}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+    });
+
+    const recentFilings = deduped.slice(0, 8);
 
     const secFilings = await Promise.all(
       recentFilings.map(async (filing) => {
