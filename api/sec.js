@@ -41,12 +41,12 @@ module.exports = async (req, res) => {
     const ticker = tickers[stockParam] || 'PLTR';
     const stockName = stockNames[stockParam] || '팔란티어';
 
-    // 일반 공시 목록
+    // 공시 목록 가져오기
     const filingsUrl = `https://finnhub.io/api/v1/stock/filings?symbol=${ticker}&token=${finnhubApiKey}`;
     const filingsRes = await fetch(filingsUrl);
     const filingsData = await filingsRes.json();
 
-    // 내부자 거래 전용 API (Form 4 상세 데이터)
+    // 내부자 거래 전용 API
     const insiderUrl = `https://finnhub.io/api/v1/stock/insider-transactions?symbol=${ticker}&token=${finnhubApiKey}`;
     const insiderRes = await fetch(insiderUrl);
     const insiderData = await insiderRes.json();
@@ -56,16 +56,19 @@ module.exports = async (req, res) => {
       return res.status(200).json({ success: false, sec: [], error: '공시 없음' });
     }
 
-    // Form 4 중복 제거 (같은 날짜 Form 4는 1개만)
+    // Form 4 중복 제거 (같은 날짜 같은 유형은 1개만)
     const seen = new Set();
-    const deduped = finnhubData.filter(filing => {
-    const key = `${filing.form}-${filing.filedDate}`;
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
+    const deduped = filingsData.filter(filing => {
+      const key = `${filing.form}-${filing.filedDate}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
     });
 
     const recentFilings = deduped.slice(0, 8);
+
+    // 이미 사용된 내부자 거래 추적
+    const usedTxIndices = new Set();
 
     const secFilings = await Promise.all(
       recentFilings.map(async (filing) => {
@@ -74,38 +77,45 @@ module.exports = async (req, res) => {
         const filingDate = filing.filedDate || filing.acceptedDate || '';
         const url = `https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=${ticker}&type=${encodeURIComponent(formType)}&dateb=&owner=include&count=10&search_text=`;
 
-        // Form 4, 3: 내부자 거래 API에서 상세 정보 가져오기
         let detailInfo = '';
-        if (formType === '4' || formType === '3') {
-          // 해당 날짜와 가장 가까운 내부자 거래 찾기
-          const matchingTx = insiderTransactions.find(tx => {
-            const txDate = tx.transactionDate || tx.filingDate || '';
-            return txDate === filingDate || txDate.startsWith(filingDate?.substring(0, 7));
-          }) || insiderTransactions[0];
 
-          if (matchingTx) {
-            const name = matchingTx.name || '알 수 없음';
-            const share = matchingTx.share || 0;
-            const change = matchingTx.change || 0;
-            const txPrice = matchingTx.transactionPrice || 0;
+        // Form 4, 3: 내부자 거래 상세 정보
+        if (formType === '4' || formType === '3') {
+          const filingDateStr = filingDate ? filingDate.substring(0, 10) : '';
+
+          const matchIdx = insiderTransactions.findIndex((tx, idx) => {
+            if (usedTxIndices.has(idx)) return false;
+            const txDate = (tx.transactionDate || tx.filingDate || '').substring(0, 10);
+            return txDate === filingDateStr;
+          });
+
+          if (matchIdx !== -1) {
+            usedTxIndices.add(matchIdx);
+            const tx = insiderTransactions[matchIdx];
+            const name = tx.name || '알 수 없음';
+            const change = tx.change || 0;
+            const txPrice = tx.transactionPrice || 0;
             const txType = change > 0 ? '매수' : change < 0 ? '매도' : '변동없음';
             const absChange = Math.abs(change);
-
-            detailInfo = `거래자: ${name}\n거래유형: ${txType}\n거래수량: ${absChange.toLocaleString()}주${txPrice ? `\n거래가: $${txPrice.toFixed(2)}` : ''}\n거래 후 보유수량: ${share.toLocaleString()}주`;
+            detailInfo = `거래자: ${name}\n거래유형: ${txType}\n거래수량: ${absChange.toLocaleString()}주${txPrice ? `\n거래가: $${txPrice.toFixed(2)}` : ''}\n거래 후 보유수량: ${tx.share?.toLocaleString() || ''}주`;
           }
         }
 
-        // 144: 내부자 매도 예고
+        // Form 144: 내부자 매도 예고
         if (formType === '144') {
-          const matchingTx = insiderTransactions.find(tx => {
-            const txDate = tx.transactionDate || tx.filingDate || '';
-            return txDate.startsWith(filingDate?.substring(0, 7));
+          const filingDateStr = filingDate ? filingDate.substring(0, 10) : '';
+          const matchIdx = insiderTransactions.findIndex((tx, idx) => {
+            if (usedTxIndices.has(idx)) return false;
+            const txDate = (tx.transactionDate || tx.filingDate || '').substring(0, 10);
+            return txDate.startsWith(filingDateStr.substring(0, 7));
           });
 
-          if (matchingTx) {
-            const name = matchingTx.name || '알 수 없음';
-            const change = Math.abs(matchingTx.change || 0);
-            const txPrice = matchingTx.transactionPrice || 0;
+          if (matchIdx !== -1) {
+            usedTxIndices.add(matchIdx);
+            const tx = insiderTransactions[matchIdx];
+            const name = tx.name || '알 수 없음';
+            const change = Math.abs(tx.change || 0);
+            const txPrice = tx.transactionPrice || 0;
             detailInfo = `매도 예정자: ${name}\n예정 매도 수량: ${change.toLocaleString()}주${txPrice ? `\n예상 가격: $${txPrice.toFixed(2)}` : ''}`;
           }
         }
