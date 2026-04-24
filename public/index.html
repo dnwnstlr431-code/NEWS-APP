@@ -24,6 +24,22 @@
             margin-bottom: 30px;
         }
 
+        .youtube-link {
+            display: inline-block;
+            font-size: 13px;
+            color: #7f8c8d;
+            text-decoration: none;
+            transition: 0.3s;
+            padding: 5px 10px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+
+        .youtube-link:hover {
+            color: #e74c3c;
+            background: rgba(231, 76, 60, 0.05);
+        }
+
         h1 {
             font-size: 36px;
             color: #2c3e50;
@@ -101,7 +117,6 @@
             border: 2px solid transparent;
         }
 
-        /* 뉴스 탭 카드 */
         .stock-card.news-mode {
             background: white;
         }
@@ -134,7 +149,6 @@
             box-shadow: 0 12px 30px rgba(39,174,96,0.2);
         }
 
-        /* 공시 탭 카드 */
         .stock-card.sec-mode {
             background: #E8EEF2;
             border: 2px solid #B0BEC5;
@@ -178,6 +192,11 @@
 <body>
     <div class="container">
         <div class="header">
+            <div>
+                <a href="https://www.youtube.com/@투자의정석-z2o" target="_blank" class="youtube-link">
+                    🎬 투자의정석
+                </a>
+            </div>
             <h1>📊 실시간 미국주식</h1>
             <p class="subtitle">종목을 선택하면 최신 정보를 확인할 수 있습니다</p>
         </div>
@@ -216,11 +235,7 @@
     </div>
 
     <script>
-        let currentTab = 'news';
-
         function switchTab(tab) {
-            currentTab = tab;
-
             document.querySelector('.tab-btn.news').classList.toggle('active', tab === 'news');
             document.querySelector('.tab-btn.sec').classList.toggle('active', tab === 'sec');
 
@@ -234,7 +249,6 @@
 
             cards.forEach(card => {
                 const stock = card.id.replace('card-', '');
-
                 if (tab === 'news') {
                     card.href = `news.html?stock=${stock}&name=${names[stock]}`;
                     card.classList.remove('sec-mode');
