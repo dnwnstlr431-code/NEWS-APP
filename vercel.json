@@ -27,11 +27,5 @@
       "src": "/(.*)",
       "dest": "/public/$1"
     }
-  ],
-  "crons": [
-    {
-      "path": "/api/cron",
-      "schedule": "0 * * * *"
-    }
   ]
 }
