@@ -35,6 +35,169 @@ module.exports = async (req, res) => {
     '20-F': '해외기업 연간 보고서'
   };
 
+  // 공시 원문 내용 가져오기
+  async function fetchFilingContent(reportUrl, formType) {
+    try {
+      if (!reportUrl) return '';
+
+      const res = await fetch(reportUrl);
+      const text = await res.text();
+
+      // Form 4, 3: 임원 거래 정보
+      if (formType === '4' || formType === '3') {
+        const nameMatch = text.match(/<rptOwnerName>(.*?)<\/rptOwnerName>/);
+        const ownerName = nameMatch ? nameMatch[1] : '';
+
+        const shares = [];
+        const shareMatches = text.matchAll(/<transactionShares>\s*<value>([\d.]+)<\/value>/g);
+        for (const match of shareMatches) shares.push(parseFloat(match[1]));
+
+        const prices = [];
+        const priceMatches = text.matchAll(/<transactionPricePerShare>\s*<value>([\d.]+)<\/value>/g);
+        for (const match of priceMatches) prices.push(parseFloat(match[1]));
+
+        const codeMatch = text.match(/<transactionCode>(.*?)<\/transactionCode>/);
+        const txCode = codeMatch ? codeMatch[1] : '';
+        const txType = txCode === 'S' ? '매도' : txCode === 'P' ? '매수' : txCode === 'A' ? '주식 수여' : txCode;
+
+        const isDirector = text.includes('<isDirector>1</isDirector>') ? '이사' : '';
+        const isOfficer = text.includes('<isOfficer>1</isOfficer>') ? '임원' : '';
+        const role = isDirector || isOfficer || '내부자';
+
+        const totalShares = shares.reduce((a, b) => a + b, 0);
+        const avgPrice = prices.length > 0
+          ? (prices.reduce((a, b) => a + b, 0) / prices.length).toFixed(2)
+          : '';
+
+        if (ownerName && totalShares) {
+          return `거래자: ${ownerName} (${role})\n거래유형: ${txType}\n총 거래수량: ${totalShares.toLocaleString()}주${avgPrice ? `\n평균가: $${avgPrice}` : ''}`;
+        }
+        return '';
+      }
+
+      // 8-K: 중요 사항 텍스트 추출
+      if (formType === '8-K' || formType === '6-K') {
+        const bodyMatch = text.match(/<BODY>([\s\S]*?)<\/BODY>/i);
+        const body = bodyMatch ? bodyMatch[1].replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim() : '';
+        return body.substring(0, 1000);
+      }
+
+      // 10-Q, 10-K: 텍스트 일부 추출
+      if (formType === '10-Q' || formType === '10-K' || formType === '20-F') {
+        const clean = text.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+        return clean.substring(0, 1000);
+      }
+
+      // DEF 14A: 주주총회 안건
+      if (formType === 'DEF 14A') {
+        const clean = text.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+        return clean.substring(0, 1000);
+      }
+
+      // SC 13G, SC 13D: 대량 보유 정보
+      if (formType === 'SC 13G' || formType === 'SC 13D') {
+        const clean = text.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+        return clean.substring(0, 1000);
+      }
+
+      return '';
+    } catch (e) {
+      return '';
+    }
+  }
+
+  // 공시 유형별 Claude 프롬프트 생성
+  function buildPrompt(stockName, formType, formDesc, filingDate, detailInfo) {
+    const base = `회사: ${stockName}
+공시 유형: ${formType} (${formDesc})
+제출일: ${filingDate}
+${detailInfo ? `\n원문 내용 요약:\n${detailInfo}\n` : ''}`;
+
+    if (formType === '4' || formType === '3') {
+      return `${base}
+아래 형식으로 한국어로 답변해줘:
+
+[공시 설명]
+Form ${formType}이 무엇인지 1문장 설명
+
+[거래 내역]
+거래자, 직책, 매수/매도, 수량, 가격을 구체적으로 설명
+
+[투자자 주목 포인트]
+이 거래가 ${stockName} 투자자에게 의미하는 바 2문장
+
+[투자 영향]
+긍정 / 부정 / 중립 중 하나와 이유 한 줄`;
+    }
+
+    if (formType === '8-K' || formType === '6-K') {
+      return `${base}
+아래 형식으로 한국어로 답변해줘:
+
+[공시 설명]
+8-K 공시가 무엇인지 1문장 설명
+
+[주요 내용]
+원문에서 가장 중요한 내용을 2-3문장으로 요약
+
+[투자자 주목 포인트]
+이 공시가 ${stockName} 투자자에게 미치는 영향 2문장
+
+[투자 영향]
+긍정 / 부정 / 중립 중 하나와 이유 한 줄`;
+    }
+
+    if (formType === '10-Q') {
+      return `${base}
+아래 형식으로 한국어로 답변해줘:
+
+[공시 설명]
+10-Q 분기 실적 보고서가 무엇인지 1문장 설명
+
+[주요 내용]
+분기 실적의 핵심 내용을 2-3문장으로 요약
+
+[투자자 주목 포인트]
+이번 분기 실적이 ${stockName} 투자자에게 의미하는 바 2문장
+
+[투자 영향]
+긍정 / 부정 / 중립 중 하나와 이유 한 줄`;
+    }
+
+    if (formType === '10-K') {
+      return `${base}
+아래 형식으로 한국어로 답변해줘:
+
+[공시 설명]
+10-K 연간 실적 보고서가 무엇인지 1문장 설명
+
+[주요 내용]
+연간 실적의 핵심 내용을 2-3문장으로 요약
+
+[투자자 주목 포인트]
+연간 실적이 ${stockName} 투자자에게 의미하는 바 2문장
+
+[투자 영향]
+긍정 / 부정 / 중립 중 하나와 이유 한 줄`;
+    }
+
+    // 기타 모든 공시
+    return `${base}
+아래 형식으로 한국어로 답변해줘:
+
+[공시 설명]
+${formType} (${formDesc})가 무엇인지 1-2문장 설명
+
+[주요 내용]
+${detailInfo ? '원문 내용을 바탕으로 핵심 내용 2-3문장 요약' : '이 공시의 일반적인 의미와 중요성 설명'}
+
+[투자자 주목 포인트]
+이 공시가 ${stockName} 투자자에게 중요한 이유 2문장
+
+[투자 영향]
+긍정 / 부정 / 중립 중 하나와 이유 한 줄`;
+  }
+
   try {
     const ticker = tickers[stockParam] || 'PLTR';
     const stockName = stockNames[stockParam] || '팔란티어';
@@ -54,57 +217,15 @@ module.exports = async (req, res) => {
         const formType = filing.form || '기타';
         const formDesc = formDescriptions[formType] || '기타 공시';
         const filingDate = filing.filedDate || filing.acceptedDate || '';
+        const reportUrl = filing.reportUrl || filing.filingUrl || '';
         const url = `https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=${ticker}&type=${encodeURIComponent(formType)}&dateb=&owner=include&count=10&search_text=`;
 
-        // Form 4일 경우 상세 내용 가져오기
-        let detailInfo = '';
-        if (formType === '4' || formType === '3') {
-          try {
-            const reportUrl = filing.reportUrl || filing.filingUrl || '';
-            if (reportUrl) {
-              const reportRes = await fetch(reportUrl);
-              const reportText = await reportRes.text();
-
-              // 임원 이름 추출
-              const nameMatch = reportText.match(/<rptOwnerName>(.*?)<\/rptOwnerName>/);
-              const ownerName = nameMatch ? nameMatch[1] : '';
-
-              // 거래 정보 추출
-              const shares = [];
-              const shareMatches = reportText.matchAll(/<transactionShares>\s*<value>([\d.]+)<\/value>/g);
-              for (const match of shareMatches) {
-                shares.push(parseFloat(match[1]));
-              }
-
-              const prices = [];
-              const priceMatches = reportText.matchAll(/<transactionPricePerShare>\s*<value>([\d.]+)<\/value>/g);
-              for (const match of priceMatches) {
-                prices.push(parseFloat(match[1]));
-              }
-
-              // 매수/매도 구분
-              const codeMatch = reportText.match(/<transactionCode>(.*?)<\/transactionCode>/);
-              const txCode = codeMatch ? codeMatch[1] : '';
-              const txType = txCode === 'S' ? '매도' : txCode === 'P' ? '매수' : txCode === 'A' ? '수여' : txCode;
-
-              // 직책 추출
-              const isDirector = reportText.includes('<isDirector>1</isDirector>') ? '이사' : '';
-              const isOfficer = reportText.includes('<isOfficer>1</isOfficer>') ? '임원' : '';
-              const role = isDirector || isOfficer || '내부자';
-
-              const totalShares = shares.reduce((a, b) => a + b, 0);
-              const avgPrice = prices.length > 0 ? (prices.reduce((a, b) => a + b, 0) / prices.length).toFixed(2) : '';
-
-              if (ownerName && totalShares) {
-                detailInfo = `거래자: ${ownerName} (${role})\n거래유형: ${txType}\n총 거래수량: ${totalShares.toLocaleString()}주${avgPrice ? `\n평균가: $${avgPrice}` : ''}`;
-              }
-            }
-          } catch (e) {
-            detailInfo = '';
-          }
-        }
+        // 원문 내용 가져오기
+        const detailInfo = await fetchFilingContent(reportUrl, formType);
 
         try {
+          const prompt = buildPrompt(stockName, formType, formDesc, filingDate, detailInfo);
+
           const claudeRes = await fetch('https://api.anthropic.com/v1/messages', {
             method: 'POST',
             headers: {
@@ -117,25 +238,7 @@ module.exports = async (req, res) => {
               max_tokens: 800,
               messages: [{
                 role: 'user',
-                content: `SEC 공시를 분석해줘.
-
-회사: ${stockName}
-공시 유형: ${formType} (${formDesc})
-제출일: ${filingDate}
-${detailInfo ? `\n거래 상세 정보:\n${detailInfo}` : ''}
-
-아래 형식으로 한국어로 답변해줘:
-
-[공시 설명]
-${formType} (${formDesc})가 무엇인지 1-2문장으로 설명
-
-${detailInfo ? `[거래 내역]\n거래자, 거래 유형, 수량, 가격 등 구체적 내용을 2-3문장으로 설명` : ''}
-
-[투자자 주목 포인트]
-이 공시가 ${stockName} 투자자에게 중요한 이유 2-3문장
-
-[투자 영향]
-긍정 / 부정 / 중립 중 하나와 이유 한 줄`
+                content: prompt
               }]
             })
           });
