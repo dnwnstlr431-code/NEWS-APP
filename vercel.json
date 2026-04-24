@@ -10,6 +10,10 @@
       "use": "@vercel/node"
     },
     {
+      "src": "api/cron.js",
+      "use": "@vercel/node"
+    },
+    {
       "src": "public/**",
       "use": "@vercel/static"
     }
@@ -24,8 +28,18 @@
       "dest": "/api/sec.js"
     },
     {
+      "src": "/api/cron",
+      "dest": "/api/cron.js"
+    },
+    {
       "src": "/(.*)",
       "dest": "/public/$1"
+    }
+  ],
+  "crons": [
+    {
+      "path": "/api/cron",
+      "schedule": "0 * * * *"
     }
   ]
 }
