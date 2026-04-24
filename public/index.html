@@ -295,39 +295,69 @@
         /* ── 모바일 반응형 ── */
         @media (max-width: 600px) {
             body { padding: 0; }
-
             .app-wrap { border-radius: 0; }
 
-            /* 헤더 */
-            .hero { padding: 14px 12px 12px; }
+            /* 헤더: 유튜브 버튼을 우상단 절대위치로 빼고 중앙 집중 */
+            .hero { padding: 14px 14px 14px; position: relative; }
 
-            /* 제목 줄바꿈 방지 */
-            .app-title {
-                font-size: 16px;
-                white-space: nowrap;
-                letter-spacing: -1px;
+            .hero-content {
+                flex-direction: column;
+                align-items: center;
+                gap: 8px;
             }
-            .app-subtitle { font-size: 10px; margin-bottom: 8px; }
 
-            .visitor-bar { padding: 5px 10px; gap: 8px; font-size: 10px; }
-            .v-num { font-size: 11px; }
+            .hero-spacer { display: none; }
 
-            .hero-spacer { min-width: 40px; }
-            .hero-right { min-width: 40px; }
-            .yt-icon-wrap { width: 34px; height: 34px; border-radius: 8px; }
-            .yt-icon-wrap svg { width: 18px; height: 13px; }
+            .hero-center { width: 100%; }
+
+            /* 유튜브 버튼 우상단 절대 배치 */
+            .hero-right {
+                position: absolute;
+                top: 14px;
+                right: 14px;
+                min-width: unset;
+                gap: 3px;
+            }
+            .yt-icon-wrap { width: 32px; height: 32px; border-radius: 8px; }
+            .yt-icon-wrap svg { width: 16px; height: 12px; }
             .yt-label { font-size: 8px; }
 
-            .body-wrap { padding: 10px 10px 20px; }
+            /* 제목: 이모지 숨기고 텍스트만 */
+            .app-title {
+                font-size: 20px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .app-subtitle {
+                font-size: 11px;
+                margin-bottom: 10px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
 
-            .tabs { gap: 6px; margin-bottom: 10px; }
-            .tab-btn { padding: 7px 14px; font-size: 11px; }
+            .visitor-bar { padding: 6px 14px; gap: 12px; font-size: 11px; }
+            .v-num { font-size: 12px; }
+
+            /* 바디 */
+            .body-wrap { padding: 12px 10px 20px; }
+
+            /* 탭: 이모지 제거 효과를 위해 크기 조정 */
+            .tabs { gap: 8px; margin-bottom: 12px; }
+            .tab-btn {
+                padding: 9px 0;
+                font-size: 12px;
+                flex: 1;
+                text-align: center;
+                white-space: nowrap;
+            }
 
             /* 카드 4개 한 줄 */
             .stocks-grid {
                 grid-template-columns: repeat(4, 1fr);
                 gap: 6px;
-                margin-bottom: 12px;
+                margin-bottom: 14px;
             }
             .stock-card {
                 padding: 10px 4px;
@@ -338,19 +368,19 @@
             .stock-name { font-size: 11px; }
 
             /* 피드 */
-            .feed-section { border-radius: 8px; }
-            .feed-header { padding: 8px 12px; }
-            .feed-header-title { font-size: 11px; }
+            .feed-section { border-radius: 8px; margin-bottom: 10px; }
+            .feed-header { padding: 9px 12px; }
+            .feed-header-title { font-size: 12px; }
             .feed-header-sub { display: none; }
 
-            .feed-item { padding: 8px 10px; gap: 6px; }
-            .feed-badge { font-size: 8px; padding: 2px 4px; min-width: 30px; }
-            .feed-title { font-size: 11px; }
-            .feed-sub { font-size: 9px; }
-            .feed-date { font-size: 9px; }
-            .feed-arrow { font-size: 12px; }
+            .feed-item { padding: 9px 10px; gap: 7px; }
+            .feed-badge { font-size: 8px; padding: 2px 5px; min-width: 32px; }
+            .feed-title { font-size: 12px; }
+            .feed-sub { font-size: 10px; }
+            .feed-date { font-size: 10px; }
+            .feed-arrow { font-size: 13px; }
 
-            .footer { font-size: 10px; }
+            .footer { font-size: 11px; margin-top: 6px; }
         }
     </style>
 </head>
