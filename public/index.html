@@ -1,4 +1,4 @@
-<!-- v4 -->
+<!-- v5 -->
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -15,15 +15,9 @@
             padding: 40px 20px;
         }
 
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-        }
+        .container { max-width: 1000px; margin: 0 auto; }
 
-        .header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
+        .header { text-align: center; margin-bottom: 20px; }
 
         .youtube-link {
             display: inline-block;
@@ -35,25 +29,10 @@
             border-radius: 4px;
             margin-bottom: 15px;
         }
+        .youtube-link:hover { color: #e74c3c; background: rgba(231,76,60,0.05); }
 
-        .youtube-link:hover {
-            color: #e74c3c;
-            background: rgba(231, 76, 60, 0.05);
-        }
-
-        h1 {
-            font-size: 36px;
-            color: #2c3e50;
-            margin-bottom: 10px;
-            font-weight: 700;
-        }
-
-        .subtitle {
-            font-size: 16px;
-            color: #7f8c8d;
-            font-weight: 300;
-            margin-bottom: 20px;
-        }
+        h1 { font-size: 36px; color: #2c3e50; margin-bottom: 10px; font-weight: 700; }
+        .subtitle { font-size: 16px; color: #7f8c8d; font-weight: 300; margin-bottom: 20px; }
 
         /* 방문자 통계 */
         .visitor-stats {
@@ -66,38 +45,18 @@
             margin-bottom: 30px;
             font-size: 14px;
         }
+        .visitor-item { display: flex; align-items: center; gap: 6px; color: #555; }
+        .visitor-item .label { color: #95a5a6; font-size: 12px; }
+        .visitor-item .count { font-weight: 700; color: #2c3e50; font-size: 15px; }
+        .visitor-divider { width: 1px; background: #ecf0f1; margin: 4px 0; }
 
-        .visitor-item {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            color: #555;
-        }
-
-        .visitor-item .label {
-            color: #95a5a6;
-            font-size: 12px;
-        }
-
-        .visitor-item .count {
-            font-weight: 700;
-            color: #2c3e50;
-            font-size: 15px;
-        }
-
-        .visitor-divider {
-            width: 1px;
-            background: #ecf0f1;
-            margin: 4px 0;
-        }
-
+        /* 탭 */
         .tabs {
             display: flex;
             justify-content: center;
             gap: 10px;
             margin-bottom: 30px;
         }
-
         .tab-btn {
             padding: 12px 40px;
             border-radius: 8px;
@@ -107,33 +66,12 @@
             cursor: pointer;
             transition: all 0.3s;
         }
+        .tab-btn.news { background: white; color: #2c3e50; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .tab-btn.news.active { box-shadow: 0 4px 15px rgba(0,0,0,0.15); transform: translateY(-2px); }
+        .tab-btn.sec { background: rgba(96,125,139,0.15); color: #607D8B; box-shadow: 0 2px 10px rgba(96,125,139,0.1); }
+        .tab-btn.sec.active { background: #607D8B; color: white; box-shadow: 0 4px 15px rgba(96,125,139,0.3); transform: translateY(-2px); }
 
-        .tab-btn.news {
-            background: white;
-            color: #2c3e50;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
-        .tab-btn.news.active {
-            background: white;
-            color: #2c3e50;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-            transform: translateY(-2px);
-        }
-
-        .tab-btn.sec {
-            background: rgba(96, 125, 139, 0.15);
-            color: #607D8B;
-            box-shadow: 0 2px 10px rgba(96,125,139,0.1);
-        }
-
-        .tab-btn.sec.active {
-            background: #607D8B;
-            color: white;
-            box-shadow: 0 4px 15px rgba(96,125,139,0.3);
-            transform: translateY(-2px);
-        }
-
+        /* 종목 카드 그리드 */
         .stocks-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -141,154 +79,136 @@
             margin-bottom: 40px;
         }
 
-        /* 카드 래퍼 - 클릭 링크 + 미리보기 합친 컨테이너 */
-        .stock-wrapper {
-            display: flex;
-            flex-direction: column;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-            transition: all 0.3s ease;
-            border: 2px solid transparent;
-            background: white;
-        }
-
-        .stock-wrapper:hover {
-            transform: translateY(-6px);
-        }
-
-        /* 뉴스 모드 hover 색상 */
-        .stock-wrapper.news-mode.pltr:hover { border-color: #3498db; box-shadow: 0 12px 30px rgba(52,152,219,0.2); }
-        .stock-wrapper.news-mode.iren:hover  { border-color: #e74c3c; box-shadow: 0 12px 30px rgba(231,76,60,0.2); }
-        .stock-wrapper.news-mode.ionq:hover  { border-color: #9b59b6; box-shadow: 0 12px 30px rgba(155,89,182,0.2); }
-        .stock-wrapper.news-mode.bmnr:hover  { border-color: #27ae60; box-shadow: 0 12px 30px rgba(39,174,96,0.2); }
-
-        /* SEC 모드 */
-        .stock-wrapper.sec-mode {
-            background: #E8EEF2;
-            border-color: #B0BEC5;
-        }
-        .stock-wrapper.sec-mode:hover {
-            border-color: #607D8B;
-            background: #CFD8DC;
-            box-shadow: 0 12px 30px rgba(96,125,139,0.3);
-        }
-
-        /* 카드 상단 클릭 영역 */
         .stock-card {
-            padding: 30px 20px 20px;
+            padding: 35px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            text-decoration: none;
-            border-bottom: 1px solid rgba(0,0,0,0.06);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            border: 2px solid transparent;
         }
 
-        .stock-code {
-            font-size: 13px;
-            font-weight: 600;
-            letter-spacing: 2px;
-            margin-bottom: 6px;
-            text-transform: uppercase;
-        }
+        .stock-card.news-mode { background: white; }
+        .stock-card.news-mode.pltr .stock-code { color: #3498db; }
+        .stock-card.news-mode.pltr:hover { border-color: #3498db; transform: translateY(-8px); box-shadow: 0 12px 30px rgba(52,152,219,0.2); }
+        .stock-card.news-mode.iren .stock-code { color: #e74c3c; }
+        .stock-card.news-mode.iren:hover { border-color: #e74c3c; transform: translateY(-8px); box-shadow: 0 12px 30px rgba(231,76,60,0.2); }
+        .stock-card.news-mode.ionq .stock-code { color: #9b59b6; }
+        .stock-card.news-mode.ionq:hover { border-color: #9b59b6; transform: translateY(-8px); box-shadow: 0 12px 30px rgba(155,89,182,0.2); }
+        .stock-card.news-mode.bmnr .stock-code { color: #27ae60; }
+        .stock-card.news-mode.bmnr:hover { border-color: #27ae60; transform: translateY(-8px); box-shadow: 0 12px 30px rgba(39,174,96,0.2); }
 
-        .news-mode .stock-code.pltr { color: #3498db; }
-        .news-mode .stock-code.iren { color: #e74c3c; }
-        .news-mode .stock-code.ionq { color: #9b59b6; }
-        .news-mode .stock-code.bmnr { color: #27ae60; }
+        .stock-card.sec-mode { background: #E8EEF2; border: 2px solid #B0BEC5; }
+        .stock-card.sec-mode .stock-code { color: #37474F; }
+        .stock-card.sec-mode .stock-name { color: #37474F; }
+        .stock-card.sec-mode:hover { border-color: #607D8B; background: #CFD8DC; transform: translateY(-8px); box-shadow: 0 12px 30px rgba(96,125,139,0.3); }
 
-        .sec-mode .stock-code { color: #37474F; }
+        .stock-code { font-size: 14px; font-weight: 600; letter-spacing: 2px; margin-bottom: 8px; text-transform: uppercase; }
+        .stock-name { font-size: 20px; font-weight: 700; text-align: center; color: #2c3e50; }
 
-        .stock-name {
-            font-size: 20px;
-            font-weight: 700;
-            text-align: center;
-            color: #2c3e50;
-        }
-
-        .sec-mode .stock-name { color: #37474F; }
-
-        /* 미리보기 영역 */
-        .stock-preview {
-            padding: 10px 14px 14px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            background: inherit;
-        }
-
-        .preview-section { display: flex; flex-direction: column; gap: 4px; }
-
-        .preview-section-title {
-            font-size: 10px;
-            font-weight: 700;
-            letter-spacing: 0.3px;
-            color: #bbb;
-            margin-bottom: 2px;
-        }
-
-        .news-mode.pltr .preview-section-title.news-label { color: #3498db; }
-        .news-mode.iren .preview-section-title.news-label { color: #e74c3c; }
-        .news-mode.ionq .preview-section-title.news-label { color: #9b59b6; }
-        .news-mode.bmnr .preview-section-title.news-label { color: #27ae60; }
-        .preview-section-title.sec-label { color: #607D8B; }
-
-        .preview-item {
-            display: flex;
-            align-items: flex-start;
-            gap: 5px;
-            font-size: 11.5px;
-            line-height: 1.4;
-        }
-
-        .preview-dot {
-            margin-top: 4px;
-            flex-shrink: 0;
-            width: 4px;
-            height: 4px;
-            border-radius: 50%;
-            background: #ddd;
-        }
-
-        .news-mode.pltr .preview-dot.news-dot { background: #3498db; }
-        .news-mode.iren .preview-dot.news-dot { background: #e74c3c; }
-        .news-mode.ionq .preview-dot.news-dot { background: #9b59b6; }
-        .news-mode.bmnr .preview-dot.news-dot { background: #27ae60; }
-        .preview-dot.sec-dot { background: #607D8B; }
-
-        .preview-title {
-            flex: 1;
+        /* ── 최신 피드 섹션 ── */
+        .feed-section {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
             overflow: hidden;
-            display: -webkit-box;
-            -webkit-line-clamp: 1;
-            -webkit-box-orient: vertical;
-            color: #444;
         }
 
-        .preview-date {
+        .feed-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 22px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .feed-header-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .feed-header-sub {
+            font-size: 12px;
+            color: #aaa;
+        }
+
+        .feed-list { display: flex; flex-direction: column; }
+
+        .feed-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 13px 22px;
+            border-bottom: 1px solid #f8f8f8;
+            text-decoration: none;
+            transition: background 0.2s;
+            cursor: pointer;
+        }
+        .feed-item:last-child { border-bottom: none; }
+        .feed-item:hover { background: #f8f9fa; }
+
+        .feed-badge {
             flex-shrink: 0;
             font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            padding: 3px 8px;
+            border-radius: 4px;
+            min-width: 46px;
+            text-align: center;
+        }
+
+        .badge-pltr { background: rgba(52,152,219,0.12); color: #3498db; }
+        .badge-iren { background: rgba(231,76,60,0.12);  color: #e74c3c; }
+        .badge-ionq { background: rgba(155,89,182,0.12); color: #9b59b6; }
+        .badge-bmnr { background: rgba(39,174,96,0.12);  color: #27ae60; }
+        .badge-sec  { background: rgba(96,125,139,0.12); color: #607D8B; }
+
+        .feed-content { flex: 1; min-width: 0; }
+
+        .feed-title {
+            font-size: 13.5px;
+            color: #2c3e50;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .feed-sub {
+            font-size: 11px;
             color: #aaa;
+            margin-top: 2px;
+        }
+
+        .feed-date {
+            flex-shrink: 0;
+            font-size: 11px;
+            color: #bbb;
             white-space: nowrap;
         }
 
-        .preview-divider {
-            height: 1px;
-            background: rgba(0,0,0,0.06);
-        }
-
-        .preview-loading {
-            font-size: 12px;
-            color: #aaa;
-            text-align: center;
-            padding: 8px 0;
-        }
-
-        .preview-empty {
-            font-size: 11px;
+        .feed-arrow {
+            flex-shrink: 0;
+            font-size: 13px;
             color: #ccc;
-            font-style: italic;
+        }
+
+        .feed-loading {
+            padding: 20px;
+            text-align: center;
+            color: #aaa;
+            font-size: 13px;
         }
 
         .footer {
@@ -310,7 +230,6 @@
             <h1>📊 실시간 미국주식</h1>
             <p class="subtitle">종목을 선택하면 최신 정보를 확인할 수 있습니다</p>
 
-            <!-- 방문자 통계 -->
             <div class="visitor-stats">
                 <div class="visitor-item">
                     <span>👤</span>
@@ -329,57 +248,49 @@
         </div>
 
         <div class="tabs">
-            <button class="tab-btn news active" onclick="switchTab('news')">
-                📰 뉴스
-            </button>
-            <button class="tab-btn sec" onclick="switchTab('sec')">
-                📋 SEC 공시
-            </button>
+            <button class="tab-btn news active" onclick="switchTab('news')">📰 뉴스</button>
+            <button class="tab-btn sec" onclick="switchTab('sec')">📋 SEC 공시</button>
         </div>
 
+        <!-- 종목 카드 -->
         <div class="stocks-grid">
-            <!-- 팔란티어 -->
-            <div class="stock-wrapper news-mode pltr" id="wrapper-palantir">
-                <a href="news.html?stock=palantir&name=팔란티어" class="stock-card" id="card-palantir">
-                    <div class="stock-code pltr">PLTR</div>
-                    <div class="stock-name">팔란티어</div>
-                </a>
-                <div class="stock-preview" id="preview-palantir">
-                    <div class="preview-loading">⏳ 불러오는 중...</div>
-                </div>
-            </div>
+            <a href="news.html?stock=palantir&name=팔란티어" class="stock-card news-mode pltr" id="card-palantir">
+                <div class="stock-code">PLTR</div>
+                <div class="stock-name">팔란티어</div>
+            </a>
+            <a href="news.html?stock=iren&name=아이렌" class="stock-card news-mode iren" id="card-iren">
+                <div class="stock-code">IREN</div>
+                <div class="stock-name">아이렌</div>
+            </a>
+            <a href="news.html?stock=ionq&name=아이온큐" class="stock-card news-mode ionq" id="card-ionq">
+                <div class="stock-code">IONQ</div>
+                <div class="stock-name">아이온큐</div>
+            </a>
+            <a href="news.html?stock=biomarin&name=비트마인" class="stock-card news-mode bmnr" id="card-biomarin">
+                <div class="stock-code">BMNR</div>
+                <div class="stock-name">비트마인</div>
+            </a>
+        </div>
 
-            <!-- 아이렌 -->
-            <div class="stock-wrapper news-mode iren" id="wrapper-iren">
-                <a href="news.html?stock=iren&name=아이렌" class="stock-card" id="card-iren">
-                    <div class="stock-code iren">IREN</div>
-                    <div class="stock-name">아이렌</div>
-                </a>
-                <div class="stock-preview" id="preview-iren">
-                    <div class="preview-loading">⏳ 불러오는 중...</div>
-                </div>
+        <!-- 최신 뉴스 피드 -->
+        <div class="feed-section">
+            <div class="feed-header">
+                <span class="feed-header-title">📰 최신 뉴스</span>
+                <span class="feed-header-sub">클릭하면 상세 분석 확인</span>
             </div>
-
-            <!-- 아이온큐 -->
-            <div class="stock-wrapper news-mode ionq" id="wrapper-ionq">
-                <a href="news.html?stock=ionq&name=아이온큐" class="stock-card" id="card-ionq">
-                    <div class="stock-code ionq">IONQ</div>
-                    <div class="stock-name">아이온큐</div>
-                </a>
-                <div class="stock-preview" id="preview-ionq">
-                    <div class="preview-loading">⏳ 불러오는 중...</div>
-                </div>
+            <div class="feed-list" id="newsFeed">
+                <div class="feed-loading">⏳ 불러오는 중...</div>
             </div>
+        </div>
 
-            <!-- 비트마인 -->
-            <div class="stock-wrapper news-mode bmnr" id="wrapper-biomarin">
-                <a href="news.html?stock=biomarin&name=비트마인" class="stock-card" id="card-biomarin">
-                    <div class="stock-code bmnr">BMNR</div>
-                    <div class="stock-name">비트마인</div>
-                </a>
-                <div class="stock-preview" id="preview-biomarin">
-                    <div class="preview-loading">⏳ 불러오는 중...</div>
-                </div>
+        <!-- 최신 SEC 공시 피드 -->
+        <div class="feed-section">
+            <div class="feed-header">
+                <span class="feed-header-title">📋 최신 SEC 공시</span>
+                <span class="feed-header-sub">클릭하면 상세 분석 확인</span>
+            </div>
+            <div class="feed-list" id="secFeed">
+                <div class="feed-loading">⏳ 불러오는 중...</div>
             </div>
         </div>
 
@@ -389,17 +300,14 @@
     </div>
 
     <script>
-        let currentTab = 'news';
-        let previewData = {};
-
         const stockInfo = {
-            'palantir': { name: '팔란티어' },
-            'iren':     { name: '아이렌' },
-            'ionq':     { name: '아이온큐' },
-            'biomarin': { name: '비트마인' }
+            'palantir': { name: '팔란티어', ticker: 'PLTR', badgeClass: 'badge-pltr' },
+            'iren':     { name: '아이렌',   ticker: 'IREN', badgeClass: 'badge-iren' },
+            'ionq':     { name: '아이온큐', ticker: 'IONQ', badgeClass: 'badge-ionq' },
+            'biomarin': { name: '비트마인', ticker: 'BMNR', badgeClass: 'badge-bmnr' }
         };
 
-        // 방문자 카운트 증가 및 표시
+        // 방문자 카운트
         async function trackVisitor() {
             try {
                 const res = await fetch('/api/visitors', { method: 'POST' });
@@ -408,116 +316,120 @@
                     document.getElementById('todayCount').textContent = data.today.toLocaleString();
                     document.getElementById('totalCount').textContent = data.total.toLocaleString();
                 }
-            } catch (e) {
-                document.getElementById('todayCount').textContent = '-';
-                document.getElementById('totalCount').textContent = '-';
-            }
+            } catch (e) {}
         }
 
-        // 뉴스 미리보기 로드
-        async function loadPreview() {
+        // 날짜 포맷
+        function formatDate(dateStr) {
+            if (!dateStr) return '';
+            const match = dateStr.match(/(\d{4})\.\s*(\d{2})\.\s*(\d{2})/);
+            if (match) return `${match[2]}/${match[3]}`;
+            // YYYY-MM-DD 형태
+            const match2 = dateStr.match(/(\d{4})-(\d{2})-(\d{2})/);
+            if (match2) return `${match2[2]}/${match2[3]}`;
+            return dateStr.substring(0, 5);
+        }
+
+        // 피드 로드
+        async function loadFeeds() {
             try {
                 const res = await fetch('/api/preview');
                 const data = await res.json();
-                if (data.success) {
-                    previewData = data.preview;
-                    renderPreviews();
-                } else {
-                    showEmptyPreviews();
+
+                if (!data.success) {
+                    document.getElementById('newsFeed').innerHTML = '<div class="feed-loading">데이터 없음</div>';
+                    document.getElementById('secFeed').innerHTML = '<div class="feed-loading">데이터 없음</div>';
+                    return;
                 }
+
+                renderNewsFeed(data.preview);
+                renderSecFeed(data.preview);
+
             } catch (e) {
-                showEmptyPreviews();
+                document.getElementById('newsFeed').innerHTML = '<div class="feed-loading">불러오기 실패</div>';
+                document.getElementById('secFeed').innerHTML = '<div class="feed-loading">불러오기 실패</div>';
             }
         }
 
-        function renderPreviews() {
+        function renderNewsFeed(preview) {
+            const container = document.getElementById('newsFeed');
+            const items = [];
+
             Object.keys(stockInfo).forEach(stock => {
-                const container = document.getElementById(`preview-${stock}`);
-                if (!container) return;
-
-                const newsItems = previewData[stock]?.news || [];
-                const secItems  = previewData[stock]?.sec  || [];
-
-                const newsHtml = newsItems.length > 0
-                    ? newsItems.map(item => `
-                        <div class="preview-item">
-                            <span class="preview-dot news-dot"></span>
-                            <span class="preview-title">${item.title}</span>
-                            <span class="preview-date">${formatDate(item.publishedAt)}</span>
-                        </div>`).join('')
-                    : '<div class="preview-empty">캐시 없음</div>';
-
-                const secHtml = secItems.length > 0
-                    ? secItems.map(item => `
-                        <div class="preview-item">
-                            <span class="preview-dot sec-dot"></span>
-                            <span class="preview-title"><strong>${item.form}</strong> · ${item.formDesc}</span>
-                            <span class="preview-date">${item.filingDate ? item.filingDate.replace(/\. /g,'/').replace('.','') : ''}</span>
-                        </div>`).join('')
-                    : '<div class="preview-empty">캐시 없음</div>';
-
-                container.innerHTML = `
-                    <div class="preview-section">
-                        <div class="preview-section-title news-label">📰 최신 뉴스</div>
-                        ${newsHtml}
-                    </div>
-                    <div class="preview-divider"></div>
-                    <div class="preview-section">
-                        <div class="preview-section-title sec-label">📋 최신 SEC</div>
-                        ${secHtml}
-                    </div>`;
+                const info = stockInfo[stock];
+                (preview[stock]?.news || []).forEach(item => {
+                    items.push({ stock, info, ...item });
+                });
             });
+
+            if (items.length === 0) {
+                container.innerHTML = '<div class="feed-loading">뉴스 캐시 없음 — 잠시 후 다시 확인해주세요</div>';
+                return;
+            }
+
+            container.innerHTML = items.map(item => `
+                <a class="feed-item" href="news.html?stock=${item.stock}&name=${item.info.name}">
+                    <span class="feed-badge ${item.info.badgeClass}">${item.info.ticker}</span>
+                    <div class="feed-content">
+                        <div class="feed-title">${item.title}</div>
+                        <div class="feed-sub">${item.info.name} · Yahoo Finance</div>
+                    </div>
+                    <span class="feed-date">${formatDate(item.publishedAt)}</span>
+                    <span class="feed-arrow">›</span>
+                </a>
+            `).join('');
         }
 
-        function showEmptyPreviews() {
-            Object.keys(stockInfo).forEach(stock => {
-                const container = document.getElementById(`preview-${stock}`);
-                if (container) container.innerHTML = `
-                    <div class="preview-section">
-                        <div class="preview-section-title news-label">📰 최신 뉴스</div>
-                        <div class="preview-empty">캐시 없음</div>
-                    </div>
-                    <div class="preview-divider"></div>
-                    <div class="preview-section">
-                        <div class="preview-section-title sec-label">📋 최신 SEC</div>
-                        <div class="preview-empty">캐시 없음</div>
-                    </div>`;
-            });
-        }
+        function renderSecFeed(preview) {
+            const container = document.getElementById('secFeed');
+            const items = [];
 
-        function formatDate(dateStr) {
-            if (!dateStr) return '';
-            // "2025. 01. 15. 오전 10:30" 형태에서 날짜만 추출
-            const match = dateStr.match(/(\d{4})\.\s*(\d{2})\.\s*(\d{2})/);
-            if (match) return `${match[2]}/${match[3]}`;
-            return '';
+            Object.keys(stockInfo).forEach(stock => {
+                const info = stockInfo[stock];
+                (preview[stock]?.sec || []).forEach(item => {
+                    items.push({ stock, info, ...item });
+                });
+            });
+
+            if (items.length === 0) {
+                container.innerHTML = '<div class="feed-loading">SEC 캐시 없음 — 종목 클릭 시 자동 생성됩니다</div>';
+                return;
+            }
+
+            container.innerHTML = items.map(item => `
+                <a class="feed-item" href="sec.html?stock=${item.stock}&name=${item.info.name}">
+                    <span class="feed-badge badge-sec">${item.form}</span>
+                    <div class="feed-content">
+                        <div class="feed-title">${item.formDesc}</div>
+                        <div class="feed-sub">${item.info.name} · SEC EDGAR</div>
+                    </div>
+                    <span class="feed-date">${formatDate(item.filingDate)}</span>
+                    <span class="feed-arrow">›</span>
+                </a>
+            `).join('');
         }
 
         function switchTab(tab) {
-            currentTab = tab;
             document.querySelector('.tab-btn.news').classList.toggle('active', tab === 'news');
             document.querySelector('.tab-btn.sec').classList.toggle('active', tab === 'sec');
 
-            Object.keys(stockInfo).forEach(stock => {
-                const wrapper = document.getElementById(`wrapper-${stock}`);
-                const card = document.getElementById(`card-${stock}`);
-                const name = stockInfo[stock].name;
-
+            const names = { palantir:'팔란티어', iren:'아이렌', ionq:'아이온큐', biomarin:'비트마인' };
+            document.querySelectorAll('.stock-card').forEach(card => {
+                const stock = card.id.replace('card-', '');
                 if (tab === 'news') {
-                    card.href = `news.html?stock=${stock}&name=${name}`;
-                    wrapper.classList.remove('sec-mode');
-                    wrapper.classList.add('news-mode');
+                    card.href = `news.html?stock=${stock}&name=${names[stock]}`;
+                    card.classList.remove('sec-mode');
+                    card.classList.add('news-mode');
                 } else {
-                    card.href = `sec.html?stock=${stock}&name=${name}`;
-                    wrapper.classList.remove('news-mode');
-                    wrapper.classList.add('sec-mode');
+                    card.href = `sec.html?stock=${stock}&name=${names[stock]}`;
+                    card.classList.remove('news-mode');
+                    card.classList.add('sec-mode');
                 }
             });
         }
 
-        // 페이지 로드 시 실행
         trackVisitor();
-        loadPreview();
+        loadFeeds();
     </script>
 </body>
 </html>
