@@ -6,10 +6,10 @@ module.exports = async (req, res) => {
   const claudeApiKey = process.env.CLAUDE_API_KEY;
 
   const cikNumbers = {
-    'palantir': '0001321655',
-    'iren': '0001620459',
-    'ionq': '0001819989',
-    'biomarin': '0001643953'
+    'palantir': '1321655',
+    'iren': '1620459',
+    'ionq': '1819989',
+    'biomarin': '1643953'
   };
 
   const stockNames = {
@@ -27,47 +27,56 @@ module.exports = async (req, res) => {
     'S-1': '신규 상장 관련',
     'DEF 14A': '주주총회 위임장',
     'SC 13G': '대량 주식 보유 보고',
-    'SC 13D': '대량 주식 보유 변경'
+    'SC 13D': '대량 주식 보유 변경',
+    '3': '임원 최초 주식 보유 보고',
+    '424B4': '증권 발행 설명서'
   };
 
   try {
     const cik = cikNumbers[stockParam] || cikNumbers['palantir'];
     const stockName = stockNames[stockParam] || '팔란티어';
+    const paddedCik = cik.padStart(10, '0');
 
-    // SEC EDGAR API로 최신 공시 가져오기
-    const secUrl = `https://data.sec.gov/submissions/CIK${cik}.json`;
+    const secUrl = `https://data.sec.gov/submissions/CIK${paddedCik}.json`;
+    
     const secRes = await fetch(secUrl, {
       headers: {
-        'User-Agent': 'NewsApp contact@newsapp.com'
+        'User-Agent': 'InvestmentNewsApp admin@investnews.com',
+        'Accept': 'application/json'
       }
     });
-    const secData = await secRes.json();
 
+    if (!secRes.ok) {
+      return res.status(200).json({ 
+        success: false, 
+        sec: [], 
+        error: `SEC API 오류: ${secRes.status}` 
+      });
+    }
+
+    const secData = await secRes.json();
     const filings = secData.filings?.recent;
+    
     if (!filings) {
       return res.status(200).json({ success: false, sec: [], error: '공시 없음' });
     }
 
-    // 최신 10개 공시 추출
     const recentFilings = [];
-    for (let i = 0; i < Math.min(10, filings.form.length); i++) {
+    for (let i = 0; i < Math.min(8, filings.form.length); i++) {
       recentFilings.push({
         form: filings.form[i],
         filingDate: filings.filingDate[i],
-        primaryDocument: filings.primaryDocument[i],
         accessionNumber: filings.accessionNumber[i],
-        primaryDocDescription: filings.primaryDocDescription[i] || ''
+        primaryDocument: filings.primaryDocument[i] || ''
       });
     }
 
-    // Claude로 공시 분석
     const secFilings = await Promise.all(
       recentFilings.map(async (filing) => {
         const formType = filing.form;
         const formDesc = formDescriptions[formType] || '기타 공시';
         const accNum = filing.accessionNumber.replace(/-/g, '');
-        const docUrl = `https://www.sec.gov/Archives/edgar/data/${parseInt(cik)}/${accNum}/${filing.primaryDocument}`;
-        const secViewUrl = `https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=${cik}&type=${formType}&dateb=&owner=include&count=10`;
+        const secViewUrl = `https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=${cik}&type=${encodeURIComponent(formType)}&dateb=&owner=include&count=10`;
 
         try {
           const claudeRes = await fetch('https://api.anthropic.com/v1/messages', {
