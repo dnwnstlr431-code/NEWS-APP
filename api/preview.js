@@ -7,12 +7,20 @@ const redis = new Redis({
 
 const stocks = ['palantir', 'iren', 'ionq', 'biomarin'];
 
+const tickers = {
+  'palantir': 'PLTR',
+  'iren': 'IREN',
+  'ionq': 'IONQ',
+  'biomarin': 'BMNR'
+};
+
 module.exports = async (req, res) => {
   res.setHeader('Content-Type', 'application/json');
   res.setHeader('Access-Control-Allow-Origin', '*');
 
   try {
-    const preview = {};
+    const allNews = [];
+    const allSec  = [];
 
     await Promise.all(stocks.map(async (stock) => {
       try {
@@ -21,37 +29,53 @@ module.exports = async (req, res) => {
           redis.get(`sec:${stock}`)
         ]);
 
-        // 뉴스 최신 2개
-        let latestNews = [];
         if (newsCache) {
           const data = typeof newsCache === 'string' ? JSON.parse(newsCache) : newsCache;
-          latestNews = (data.news || []).slice(0, 2).map(item => ({
-            title: item.title,
-            publishedAt: item.publishedAt
-          }));
+          (data.news || []).slice(0, 5).forEach(item => {
+            allNews.push({
+              stock,
+              ticker: tickers[stock],
+              title: item.title,
+              publishedAt: item.publishedAt,
+              _sortDate: new Date(item.publishedAt || 0).getTime() || 0
+            });
+          });
         }
 
-        // SEC 최신 2개
-        let latestSec = [];
         if (secCache) {
           const data = typeof secCache === 'string' ? JSON.parse(secCache) : secCache;
-          latestSec = (data.sec || []).slice(0, 2).map(item => ({
-            form: item.form,
-            formDesc: item.formDesc,
-            filingDate: item.filingDate
-          }));
+          (data.sec || []).slice(0, 4).forEach(item => {
+            allSec.push({
+              stock,
+              ticker: tickers[stock],
+              form: item.form,
+              formDesc: item.formDesc,
+              filingDate: item.filingDate,
+              _sortDate: new Date(item.filingDate || 0).getTime() || 0
+            });
+          });
         }
-
-        preview[stock] = { news: latestNews, sec: latestSec };
-
       } catch {
-        preview[stock] = { news: [], sec: [] };
+        // 개별 종목 실패 시 스킵
       }
     }));
 
-    return res.status(200).json({ success: true, preview });
+    // 날짜 최신순 정렬
+    allNews.sort((a, b) => b._sortDate - a._sortDate);
+    allSec.sort((a, b) => b._sortDate - a._sortDate);
+
+    return res.status(200).json({
+      success: true,
+      news: allNews.slice(0, 8),
+      sec: allSec.slice(0, 8)
+    });
 
   } catch (error) {
-    return res.status(200).json({ success: false, preview: {}, error: error.message });
+    return res.status(200).json({
+      success: false,
+      news: [],
+      sec: [],
+      error: error.message
+    });
   }
 };
