@@ -7,7 +7,7 @@ module.exports = async (req, res) => {
 
   const cikNumbers = {
     'palantir': '1321655',
-    'iren': '1620459',
+    'iren': '1878848',
     'ionq': '1819989',
     'biomarin': '1643953'
   };
@@ -24,12 +24,14 @@ module.exports = async (req, res) => {
     '10-Q': '분기 실적 보고서',
     '10-K': '연간 실적 보고서',
     '4': '임원 주식 매매',
+    '3': '임원 최초 주식 보유 보고',
     'S-1': '신규 상장 관련',
     'DEF 14A': '주주총회 위임장',
     'SC 13G': '대량 주식 보유 보고',
     'SC 13D': '대량 주식 보유 변경',
-    '3': '임원 최초 주식 보유 보고',
-    '424B4': '증권 발행 설명서'
+    '424B4': '증권 발행 설명서',
+    '6-K': '해외기업 수시 보고서',
+    '20-F': '해외기업 연간 보고서'
   };
 
   try {
@@ -38,25 +40,26 @@ module.exports = async (req, res) => {
     const paddedCik = cik.padStart(10, '0');
 
     const secUrl = `https://data.sec.gov/submissions/CIK${paddedCik}.json`;
-    
+
     const secRes = await fetch(secUrl, {
       headers: {
-        'User-Agent': 'InvestmentNewsApp admin@investnews.com',
+        'User-Agent': 'InvestmentApp woojunsik@gmail.com',
         'Accept': 'application/json'
       }
     });
 
-    if (!secRes.ok) {
-      return res.status(200).json({ 
-        success: false, 
-        sec: [], 
-        error: `SEC API 오류: ${secRes.status}` 
+    const contentType = secRes.headers.get('content-type') || '';
+    if (!secRes.ok || !contentType.includes('application/json')) {
+      return res.status(200).json({
+        success: false,
+        sec: [],
+        error: `SEC API 오류 (${secRes.status})`
       });
     }
 
     const secData = await secRes.json();
     const filings = secData.filings?.recent;
-    
+
     if (!filings) {
       return res.status(200).json({ success: false, sec: [], error: '공시 없음' });
     }
@@ -66,8 +69,7 @@ module.exports = async (req, res) => {
       recentFilings.push({
         form: filings.form[i],
         filingDate: filings.filingDate[i],
-        accessionNumber: filings.accessionNumber[i],
-        primaryDocument: filings.primaryDocument[i] || ''
+        accessionNumber: filings.accessionNumber[i]
       });
     }
 
