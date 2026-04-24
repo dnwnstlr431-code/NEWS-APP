@@ -75,7 +75,6 @@ module.exports = async (req, res) => {
       recentFilings.map(async (filing) => {
         const formType = filing.form;
         const formDesc = formDescriptions[formType] || '기타 공시';
-        const accNum = filing.accessionNumber.replace(/-/g, '');
         const secViewUrl = `https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=${cik}&type=${encodeURIComponent(formType)}&dateb=&owner=include&count=10`;
 
         try {
