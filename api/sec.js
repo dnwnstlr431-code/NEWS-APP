@@ -68,7 +68,7 @@ module.exports = async (req, res) => {
             },
             body: JSON.stringify({
               model: 'claude-haiku-4-5-20251001',
-              max_tokens: 400,
+              max_tokens: 800,
               messages: [{
                 role: 'user',
                 content: `SEC 공시를 분석해줘.
