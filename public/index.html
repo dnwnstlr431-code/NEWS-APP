@@ -293,94 +293,85 @@
         }
 
         /* ── 모바일 반응형 ── */
-        @media (max-width: 600px) {
-            body { padding: 0; }
-            .app-wrap { border-radius: 0; }
+        @media (max-width: 768px) {
+            body { padding: 0 !important; }
+            .app-wrap { border-radius: 0 !important; }
 
-            /* 헤더: 유튜브 버튼을 우상단 절대위치로 빼고 중앙 집중 */
-            .hero { padding: 14px 14px 14px; position: relative; }
+            .hero { padding: 14px !important; position: relative !important; }
 
             .hero-content {
-                flex-direction: column;
-                align-items: center;
-                gap: 8px;
+                flex-direction: column !important;
+                align-items: center !important;
+                gap: 8px !important;
             }
 
-            .hero-spacer { display: none; }
+            .hero-spacer { display: none !important; }
+            .hero-center { width: 100% !important; }
 
-            .hero-center { width: 100%; }
-
-            /* 유튜브 버튼 우상단 절대 배치 */
             .hero-right {
-                position: absolute;
-                top: 14px;
-                right: 14px;
-                min-width: unset;
-                gap: 3px;
+                position: absolute !important;
+                top: 14px !important;
+                right: 14px !important;
+                min-width: unset !important;
+                gap: 3px !important;
             }
-            .yt-icon-wrap { width: 32px; height: 32px; border-radius: 8px; }
-            .yt-icon-wrap svg { width: 16px; height: 12px; }
-            .yt-label { font-size: 8px; }
+            .yt-icon-wrap { width: 32px !important; height: 32px !important; border-radius: 8px !important; }
+            .yt-label { font-size: 8px !important; }
 
-            /* 제목: 이모지 숨기고 텍스트만 */
             .app-title {
-                font-size: 20px;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
+                font-size: 20px !important;
+                white-space: nowrap !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
             }
             .app-subtitle {
-                font-size: 11px;
-                margin-bottom: 10px;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
+                font-size: 11px !important;
+                margin-bottom: 10px !important;
+                white-space: nowrap !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
             }
 
-            .visitor-bar { padding: 6px 14px; gap: 12px; font-size: 11px; }
-            .v-num { font-size: 12px; }
+            .visitor-bar { padding: 6px 14px !important; gap: 12px !important; font-size: 11px !important; }
+            .v-num { font-size: 12px !important; }
 
-            /* 바디 */
-            .body-wrap { padding: 12px 10px 20px; }
+            .body-wrap { padding: 12px 10px 20px !important; }
 
-            /* 탭: 이모지 제거 효과를 위해 크기 조정 */
-            .tabs { gap: 8px; margin-bottom: 12px; }
+            .tabs { gap: 8px !important; margin-bottom: 12px !important; }
             .tab-btn {
-                padding: 9px 0;
-                font-size: 12px;
-                flex: 1;
-                text-align: center;
-                white-space: nowrap;
+                padding: 9px 0 !important;
+                font-size: 12px !important;
+                flex: 1 !important;
+                text-align: center !important;
+                white-space: nowrap !important;
             }
 
-            /* 카드 4개 한 줄 */
             .stocks-grid {
-                grid-template-columns: repeat(4, 1fr);
-                gap: 6px;
-                margin-bottom: 14px;
+                grid-template-columns: repeat(4, 1fr) !important;
+                gap: 6px !important;
+                margin-bottom: 14px !important;
             }
             .stock-card {
-                padding: 10px 4px;
-                border-radius: 8px;
-                border-width: 1.5px;
+                padding: 10px 4px !important;
+                border-radius: 8px !important;
+                border-width: 1.5px !important;
             }
-            .stock-code { font-size: 9px; letter-spacing: 0.5px; margin-bottom: 3px; }
-            .stock-name { font-size: 11px; }
+            .stock-code { font-size: 9px !important; letter-spacing: 0.5px !important; margin-bottom: 3px !important; }
+            .stock-name { font-size: 11px !important; }
 
-            /* 피드 */
-            .feed-section { border-radius: 8px; margin-bottom: 10px; }
-            .feed-header { padding: 9px 12px; }
-            .feed-header-title { font-size: 12px; }
-            .feed-header-sub { display: none; }
+            .feed-section { border-radius: 8px !important; margin-bottom: 10px !important; }
+            .feed-header { padding: 9px 12px !important; }
+            .feed-header-title { font-size: 12px !important; }
+            .feed-header-sub { display: none !important; }
 
-            .feed-item { padding: 9px 10px; gap: 7px; }
-            .feed-badge { font-size: 8px; padding: 2px 5px; min-width: 32px; }
-            .feed-title { font-size: 12px; }
-            .feed-sub { font-size: 10px; }
-            .feed-date { font-size: 10px; }
-            .feed-arrow { font-size: 13px; }
+            .feed-item { padding: 9px 10px !important; gap: 7px !important; }
+            .feed-badge { font-size: 8px !important; padding: 2px 5px !important; min-width: 32px !important; }
+            .feed-title { font-size: 12px !important; }
+            .feed-sub { font-size: 10px !important; }
+            .feed-date { font-size: 10px !important; }
+            .feed-arrow { font-size: 13px !important; }
 
-            .footer { font-size: 11px; margin-top: 6px; }
+            .footer { font-size: 11px !important; margin-top: 6px !important; }
         }
     </style>
 </head>
