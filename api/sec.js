@@ -38,47 +38,60 @@ module.exports = async (req, res) => {
     const cik = cikNumbers[stockParam] || cikNumbers['palantir'];
     const stockName = stockNames[stockParam] || '팔란티어';
 
-    // SEC RSS 피드 가져오기
     const rssUrl = `https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=${cik}&type=&dateb=&owner=include&count=10&search_text=&output=atom`;
 
     const rssRes = await fetch(rssUrl, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-        'Accept': 'application/atom+xml, application/xml, text/xml, */*'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36',
+        'Accept': '*/*'
       }
     });
 
     const rssText = await rssRes.text();
 
-    // XML 파싱
-    const entries = rssText.match(/<entry>([\s\S]*?)<\/entry>/g) || [];
+    // 디버깅용: 응답 첫 200자 확인
+    const preview = rssText.substring(0, 200);
 
-    if (entries.length === 0) {
-      return res.status(200).json({ success: false, sec: [], error: 'SEC 공시를 가져올 수 없습니다.' });
+    // entry 태그 파싱 시도
+    const entryMatches = rssText.match(/<entry>([\s\S]*?)<\/entry>/g);
+
+    if (!entryMatches || entryMatches.length === 0) {
+      // 응답이 왔지만 파싱 실패 → 미리보기 반환해서 디버깅
+      return res.status(200).json({
+        success: false,
+        sec: [],
+        error: '파싱 실패',
+        debug: preview
+      });
     }
 
-    const filings = entries.slice(0, 8).map(entry => {
-      const title = (entry.match(/<title[^>]*>([\s\S]*?)<\/title>/) || [])[1] || '';
-      const updated = (entry.match(/<updated>([\s\S]*?)<\/updated>/) || [])[1] || '';
-      const link = (entry.match(/href="([^"]*)"/) || [])[1] || '';
-      const summary = (entry.match(/<summary[^>]*>([\s\S]*?)<\/summary>/) || [])[1] || '';
+    const filings = entryMatches.slice(0, 8).map(entry => {
+      const titleMatch = entry.match(/<title[^>]*>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/title>/);
+      const updatedMatch = entry.match(/<updated>([\s\S]*?)<\/updated>/);
+      const linkMatch = entry.match(/<link[^>]*href="([^"]+)"/);
+      const summaryMatch = entry.match(/<summary[^>]*>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/summary>/);
 
-      // 공시 유형 추출 (예: "8-K")
-      const formMatch = title.match(/^([^\s]+)/);
+      const title = titleMatch ? titleMatch[1].replace(/<[^>]*>/g, '').trim() : '제목 없음';
+      const updated = updatedMatch ? updatedMatch[1].trim() : '';
+      const link = linkMatch ? linkMatch[1].trim() : '';
+      const summary = summaryMatch ? summaryMatch[1].replace(/<[^>]*>/g, '').trim() : '';
+
+      // 공시 유형 추출
+      const formMatch = title.match(/^([A-Z0-9\-\/]+)/);
       const formType = formMatch ? formMatch[1].trim() : '기타';
       const formDesc = formDescriptions[formType] || '기타 공시';
 
       return {
         formType,
         formDesc,
-        title: title.replace(/<[^>]*>/g, '').trim(),
+        title,
         filingDate: updated ? new Date(updated).toLocaleDateString('ko-KR', {
           year: 'numeric',
           month: '2-digit',
           day: '2-digit'
         }) : '날짜 없음',
         link: link || `https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=${cik}&type=&count=10`,
-        summary: summary.replace(/<[^>]*>/g, '').trim()
+        summary
       };
     });
 
@@ -125,7 +138,7 @@ ${filing.formType} (${filing.formDesc})가 무엇인지 1-2문장으로 설명
             form: filing.formType,
             formDesc: filing.formDesc,
             filingDate: filing.filingDate,
-            analysis: analysis,
+            analysis,
             url: filing.link
           };
         } catch (err) {
@@ -141,7 +154,12 @@ ${filing.formType} (${filing.formDesc})가 무엇인지 1-2문장으로 설명
     );
 
     return res.status(200).json({ success: true, sec: secFilings });
+
   } catch (error) {
-    return res.status(200).json({ success: false, sec: [], error: error.message });
+    return res.status(200).json({ 
+      success: false, 
+      sec: [], 
+      error: error.message 
+    });
   }
 };
