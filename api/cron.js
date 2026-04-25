@@ -278,26 +278,24 @@ module.exports = async (req, res) => {
   res.setHeader('Content-Type', 'application/json');
 
   const stocks = ['palantir', 'iren', 'ionq', 'biomarin'];
-  const results = { news: {}, sec: {}, earnings: {} };
 
-  for (const stock of stocks) {
-    // 뉴스 갱신
-    results.news[stock] = await fetchAndCacheNews(stock);
-    await new Promise(r => setTimeout(r, 800));
-
-    // SEC 갱신
-    results.sec[stock] = await fetchAndCacheSec(stock);
-    await new Promise(r => setTimeout(r, 800));
-
-    // 실적 갱신
-    results.earnings[stock] = await fetchAndCacheEarnings(stock);
-    await new Promise(r => setTimeout(r, 800));
-  }
-
-  return res.status(200).json({
+  // 즉시 응답 (타임아웃 방지)
+  res.status(200).json({
     success: true,
-    message: '뉴스 + SEC + 실적 전 종목 캐시 완료',
-    results,
+    message: '캐시 갱신 시작 (백그라운드 처리 중)',
     updatedAt: new Date().toISOString()
   });
+
+  // 응답 후 백그라운드에서 순차 처리
+  (async () => {
+    for (const stock of stocks) {
+      await fetchAndCacheNews(stock);
+      await new Promise(r => setTimeout(r, 500));
+      await fetchAndCacheSec(stock);
+      await new Promise(r => setTimeout(r, 500));
+      await fetchAndCacheEarnings(stock);
+      await new Promise(r => setTimeout(r, 500));
+    }
+    console.log('✅ 전 종목 캐시 갱신 완료:', new Date().toISOString());
+  })();
 };
