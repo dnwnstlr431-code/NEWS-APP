@@ -169,7 +169,8 @@ module.exports = async (req, res) => {
           return {
             form: formType,
             formDesc: formDesc,
-            filingDate: filingDate ? new Date(filingDate).toLocaleDateString('ko-KR', {
+            filingDate: filingDate ? new Date(filingDate).toLocaleString('ko-KR', {
+              timeZone: 'Asia/Seoul',
               year: 'numeric', month: '2-digit', day: '2-digit'
             }) : '날짜 없음',
             analysis,
@@ -179,7 +180,7 @@ module.exports = async (req, res) => {
           return {
             form: formType,
             formDesc: formDesc,
-            filingDate: filingDate ? new Date(filingDate).toLocaleDateString('ko-KR') : '날짜 없음',
+            filingDate: filingDate ? new Date(filingDate).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit' }) : '날짜 없음',
             analysis: null,
             url
           };
