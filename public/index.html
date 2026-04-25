@@ -546,6 +546,11 @@
                 renderNewsFeed(data.news || []);
                 renderEarningsFeed(data.earnings || []);
                 renderSecFeed(data.sec || []);
+
+                // 캐시 없는 종목 있으면 30초 후 자동 새로고침
+                if (data.autoRefresh) {
+                    setTimeout(() => loadFeeds(), 30000);
+                }
             } catch (e) { showFeedError(); }
         }
 
