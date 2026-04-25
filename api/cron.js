@@ -78,7 +78,7 @@ async function fetchAndCacheNews(stockParam) {
             max_tokens: 500,
             messages: [{
               role: 'user',
-              content: `다음 뉴스를 분석해줘.\n\n제목: ${article.title}\n내용: ${originalText}\n\n아래 형식으로 한국어로 답변해줘:\n\n[한글 번역]\n(뉴스 내용을 자연스러운 한국어로 번역)\n\n[AI 요약]\n(${stockName} 투자자 관점에서 2-3문장으로 핵심 요약)\n\n[투자 영향]\n긍정 / 부정 / 중립 중 하나와 이유 한 줄`
+              content: `다음 뉴스를 분석해줘. 내용이 일부만 제공되더라도 주어진 정보만으로 반드시 분석을 완성해줘. 내용 부족을 언급하지 말고 바로 분석 결과만 답변해줘.\n\n제목: ${article.title}\n내용: ${originalText}\n\n아래 형식으로 한국어로 답변해줘:\n\n[한글 번역]\n(제목과 내용을 자연스러운 한국어로 번역)\n\n[AI 요약]\n(${stockName} 투자자 관점에서 2-3문장으로 핵심 요약)\n\n[투자 영향]\n긍정 / 부정 / 중립 중 하나와 이유 한 줄`
             }]
           })
         });
@@ -210,12 +210,75 @@ async function fetchAndCacheSec(stockParam) {
   }
 }
 
+
+// ── 실적 캐시 ───────────────────────────────
+async function fetchAndCacheEarnings(stockParam) {
+  const ticker = tickers[stockParam];
+  const stockName = stockNames[stockParam];
+  const claudeApiKey = process.env.CLAUDE_API_KEY;
+  const finnhubApiKey = process.env.FINNHUB_API_KEY;
+
+  try {
+    const now = new Date();
+    const from = new Date(now); from.setFullYear(from.getFullYear() - 1);
+    const to = new Date(now); to.setFullYear(to.getFullYear() + 1);
+    const today = now.toISOString().split('T')[0];
+
+    const url = `https://finnhub.io/api/v1/calendar/earnings?symbol=${ticker}&from=${from.toISOString().split('T')[0]}&to=${to.toISOString().split('T')[0]}&token=${finnhubApiKey}`;
+    const response = await fetch(url);
+    const data = await response.json();
+    const earningsArr = data.earningsCalendar || [];
+
+    if (earningsArr.length === 0) {
+      console.log(`⚠️ [실적] ${stockName} 데이터 없음`);
+      return false;
+    }
+
+    const sorted = earningsArr.sort((a, b) => new Date(b.date) - new Date(a.date));
+    const past = sorted.filter(e => e.date <= today).slice(0, 4);
+    const future = sorted.filter(e => e.date > today).reverse().slice(0, 2);
+    const combined = [...future, ...past];
+
+    const earnings = await Promise.all(combined.map(async (item) => {
+      const isFuture = item.date > today;
+      let beatMiss = '';
+      if (!isFuture && item.epsActual !== null && item.epsEstimate !== null) {
+        if (item.epsActual > item.epsEstimate) beatMiss = 'BEAT';
+        else if (item.epsActual < item.epsEstimate) beatMiss = 'MISS';
+        else beatMiss = 'MEET';
+      }
+      try {
+        const prompt = isFuture
+          ? `${stockName}(${ticker}) 다음 실적 발표 예정일: ${item.date}, 발표시간: ${item.hour === 'bmo' ? '장 시작 전' : item.hour === 'amc' ? '장 마감 후' : '미정'}, 예상 주당순이익: ${item.epsEstimate !== null ? '$'+item.epsEstimate : '미공개'}\n\n아래 형식으로 한국어로 쉽게 답변해줘:\n\n[발표 예정 포인트]\n투자자들이 주목해야 할 점 2-3가지\n\n[예상 주당순이익 설명]\n주당순이익이 무엇인지 쉽게 설명하고 이번 예상치 의미\n\n[주목할 특이사항]\n이번 실적에 영향을 줄 수 있는 요소 1-2가지`
+          : `${stockName}(${ticker}) 실적 결과 - 날짜: ${item.date}, 예상EPS: ${item.epsEstimate}, 실제EPS: ${item.epsActual}, 결과: ${beatMiss}\n\n아래 형식으로 한국어로 쉽게 답변해줘:\n\n[실적 요약]\n핵심 내용 2문장\n\n[투자자 영향]\n투자자에게 미치는 의미 2문장\n\n[다음 분기 전망]\n주목해야 할 점\n\n[투자 영향]\n긍정 / 부정 / 중립 중 하나와 이유 한 줄`;
+
+        const claudeRes = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: { 'x-api-key': claudeApiKey, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
+          body: JSON.stringify({ model: 'claude-haiku-4-5-20251001', max_tokens: 800, messages: [{ role: 'user', content: prompt }] })
+        });
+        const cd = await claudeRes.json();
+        return { date: item.date, hour: item.hour, hourKo: item.hour === 'bmo' ? '장 시작 전' : item.hour === 'amc' ? '장 마감 후' : '미정', epsEstimate: item.epsEstimate, epsActual: item.epsActual, revenueEstimate: item.revenueEstimate, revenueActual: item.revenueActual, beatMiss, isFuture, analysis: cd.content?.[0]?.text || null };
+      } catch {
+        return { date: item.date, hour: item.hour, hourKo: item.hour === 'bmo' ? '장 시작 전' : item.hour === 'amc' ? '장 마감 후' : '미정', epsEstimate: item.epsEstimate, epsActual: item.epsActual, revenueEstimate: item.revenueEstimate, revenueActual: item.revenueActual, beatMiss, isFuture, analysis: null };
+      }
+    }));
+
+    await redis.set(`earnings:${stockParam}`, JSON.stringify({ earnings, updatedAt: new Date().toISOString() }), { ex: 21600 });
+    console.log(`✅ [실적] ${stockName} 캐시 완료`);
+    return true;
+  } catch (error) {
+    console.error(`❌ [실적] ${stockName} 실패:`, error);
+    return false;
+  }
+}
+
 // ── 메인 ───────────────────────────────────
 module.exports = async (req, res) => {
   res.setHeader('Content-Type', 'application/json');
 
   const stocks = ['palantir', 'iren', 'ionq', 'biomarin'];
-  const results = { news: {}, sec: {} };
+  const results = { news: {}, sec: {}, earnings: {} };
 
   for (const stock of stocks) {
     // 뉴스 갱신
@@ -225,11 +288,15 @@ module.exports = async (req, res) => {
     // SEC 갱신
     results.sec[stock] = await fetchAndCacheSec(stock);
     await new Promise(r => setTimeout(r, 800));
+
+    // 실적 갱신
+    results.earnings[stock] = await fetchAndCacheEarnings(stock);
+    await new Promise(r => setTimeout(r, 800));
   }
 
   return res.status(200).json({
     success: true,
-    message: '뉴스 + SEC 전 종목 캐시 완료',
+    message: '뉴스 + SEC + 실적 전 종목 캐시 완료',
     results,
     updatedAt: new Date().toISOString()
   });
