@@ -36,6 +36,27 @@ const formDescriptions = {
   '20-F': '해외기업 연간 보고서'
 };
 
+
+// UTC → 한국시간(UTC+9) 변환 함수
+function toKSTString(dateStr, includeTime = true) {
+  try {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return '';
+    const kst = new Date(d.getTime() + 9 * 60 * 60 * 1000);
+    const y = kst.getUTCFullYear();
+    const mo = String(kst.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(kst.getUTCDate()).padStart(2, '0');
+    if (!includeTime) return `${y}. ${mo}. ${day}.`;
+    const h = kst.getUTCHours();
+    const mi = String(kst.getUTCMinutes()).padStart(2, '0');
+    const ampm = h < 12 ? 'AM' : 'PM';
+    const h12 = String(h % 12 || 12).padStart(2, '0');
+    return `${y}. ${mo}. ${day}. ${ampm} ${h12}:${mi}`;
+  } catch {
+    return '';
+  }
+}
+
 // ── 뉴스 캐시 ──────────────────────────────
 async function fetchAndCacheNews(stockParam) {
   const ticker = tickers[stockParam];
@@ -88,11 +109,7 @@ async function fetchAndCacheNews(stockParam) {
           originalContent: originalText,
           analysis: claudeData.content?.[0]?.text || null,
           source: 'Yahoo Finance',
-          publishedAt: new Date(article.pubDate).toLocaleString('ko-KR', {
-            timeZone: 'Asia/Seoul',
-            year: 'numeric', month: '2-digit', day: '2-digit',
-            hour: '2-digit', minute: '2-digit'
-          }),
+          publishedAt: toKSTString(article.pubDate),
           url: article.link
         };
       } catch {
@@ -101,7 +118,7 @@ async function fetchAndCacheNews(stockParam) {
           originalContent: originalText,
           analysis: null,
           source: 'Yahoo Finance',
-          publishedAt: new Date(article.pubDate).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }),
+          publishedAt: toKSTString(article.pubDate),
           url: article.link
         };
       }
@@ -191,15 +208,12 @@ async function fetchAndCacheSec(stockParam) {
         return {
           form: formType,
           formDesc,
-          filingDate: filingDate ? new Date(filingDate).toLocaleString('ko-KR', {
-            timeZone: 'Asia/Seoul',
-            year: 'numeric', month: '2-digit', day: '2-digit'
-          }) : '날짜 없음',
+          filingDate: filingDate ? toKSTString(filingDate, false) : '날짜 없음',
           analysis: claudeData.content?.[0]?.text || null,
           url
         };
       } catch {
-        return { form: formType, formDesc, filingDate: filingDate ? new Date(filingDate).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit' }) : '날짜 없음', analysis: null, url };
+        return { form: formType, formDesc, filingDate: filingDate ? toKSTString(filingDate, false) : '날짜 없음', analysis: null, url };
       }
     }));
 
