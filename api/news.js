@@ -19,6 +19,26 @@ const tickers = {
   'biomarin': 'BMNR'
 };
 
+
+// UTC → 한국시간(UTC+9) 변환 함수
+function toKSTString(dateStr) {
+  try {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return '';
+    const kst = new Date(d.getTime() + 9 * 60 * 60 * 1000);
+    const y = kst.getUTCFullYear();
+    const mo = String(kst.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(kst.getUTCDate()).padStart(2, '0');
+    const h = kst.getUTCHours();
+    const mi = String(kst.getUTCMinutes()).padStart(2, '0');
+    const ampm = h < 12 ? 'AM' : 'PM';
+    const h12 = String(h % 12 || 12).padStart(2, '0');
+    return `${y}. ${mo}. ${day}. ${ampm} ${h12}:${mi}`;
+  } catch {
+    return '';
+  }
+}
+
 module.exports = async (req, res) => {
   res.setHeader('Content-Type', 'application/json');
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -101,10 +121,7 @@ module.exports = async (req, res) => {
           originalContent: originalText,
           analysis: claudeData.content?.[0]?.text || null,
           source: 'Yahoo Finance',
-          publishedAt: new Date(article.pubDate).toLocaleDateString('ko-KR', {
-            year: 'numeric', month: '2-digit', day: '2-digit',
-            hour: '2-digit', minute: '2-digit'
-          }),
+          publishedAt: toKSTString(article.pubDate),
           url: article.link
         };
       } catch {
@@ -113,7 +130,7 @@ module.exports = async (req, res) => {
           originalContent: originalText,
           analysis: null,
           source: 'Yahoo Finance',
-          publishedAt: new Date(article.pubDate).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }),
+          publishedAt: toKSTString(article.pubDate),
           url: article.link
         };
       }
