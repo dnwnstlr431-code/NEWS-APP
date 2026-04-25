@@ -88,7 +88,8 @@ async function fetchAndCacheNews(stockParam) {
           originalContent: originalText,
           analysis: claudeData.content?.[0]?.text || null,
           source: 'Yahoo Finance',
-          publishedAt: new Date(article.pubDate).toLocaleDateString('ko-KR', {
+          publishedAt: new Date(article.pubDate).toLocaleString('ko-KR', {
+            timeZone: 'Asia/Seoul',
             year: 'numeric', month: '2-digit', day: '2-digit',
             hour: '2-digit', minute: '2-digit'
           }),
@@ -100,7 +101,7 @@ async function fetchAndCacheNews(stockParam) {
           originalContent: originalText,
           analysis: null,
           source: 'Yahoo Finance',
-          publishedAt: new Date(article.pubDate).toLocaleDateString('ko-KR'),
+          publishedAt: new Date(article.pubDate).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }),
           url: article.link
         };
       }
@@ -190,14 +191,15 @@ async function fetchAndCacheSec(stockParam) {
         return {
           form: formType,
           formDesc,
-          filingDate: filingDate ? new Date(filingDate).toLocaleDateString('ko-KR', {
+          filingDate: filingDate ? new Date(filingDate).toLocaleString('ko-KR', {
+            timeZone: 'Asia/Seoul',
             year: 'numeric', month: '2-digit', day: '2-digit'
           }) : '날짜 없음',
           analysis: claudeData.content?.[0]?.text || null,
           url
         };
       } catch {
-        return { form: formType, formDesc, filingDate, analysis: null, url };
+        return { form: formType, formDesc, filingDate: filingDate ? new Date(filingDate).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit' }) : '날짜 없음', analysis: null, url };
       }
     }));
 
