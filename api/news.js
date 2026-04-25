@@ -19,8 +19,6 @@ const tickers = {
   'biomarin': 'BMNR'
 };
 
-
-// UTC → 한국시간(UTC+9) 변환 함수
 function toKSTString(dateStr) {
   try {
     const d = new Date(dateStr);
@@ -34,7 +32,7 @@ function toKSTString(dateStr) {
     const ampm = h < 12 ? 'AM' : 'PM';
     const h12 = String(h % 12 || 12).padStart(2, '0');
     return `${y}. ${mo}. ${day}. ${ampm} ${h12}:${mi}`;
-  } catch {
+  } catch (e) {
     return '';
   }
 }
@@ -47,7 +45,6 @@ module.exports = async (req, res) => {
   const claudeApiKey = process.env.CLAUDE_API_KEY;
 
   try {
-    // 캐시 확인
     const cached = await redis.get(`news:${stockParam}`);
     if (cached) {
       const data = typeof cached === 'string' ? JSON.parse(cached) : cached;
@@ -124,7 +121,7 @@ module.exports = async (req, res) => {
           publishedAt: toKSTString(article.pubDate),
           url: article.link
         };
-      } catch {
+      } catch (err) {
         return {
           title: article.title,
           originalContent: originalText,
