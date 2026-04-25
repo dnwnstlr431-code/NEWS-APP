@@ -5,6 +5,20 @@ const redis = new Redis({
   token: process.env.UPSTASH_REDIS_REST_TOKEN,
 });
 
+
+// UTC → 한국시간(UTC+9) 변환 함수
+function toKSTString(dateStr, includeTime = false) {
+  try {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return '';
+    const kst = new Date(d.getTime() + 9 * 60 * 60 * 1000);
+    const y = kst.getUTCFullYear();
+    const mo = String(kst.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(kst.getUTCDate()).padStart(2, '0');
+    return `${y}. ${mo}. ${day}.`;
+  } catch { return ''; }
+}
+
 module.exports = async (req, res) => {
   res.setHeader('Content-Type', 'application/json');
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -169,10 +183,7 @@ module.exports = async (req, res) => {
           return {
             form: formType,
             formDesc: formDesc,
-            filingDate: filingDate ? new Date(filingDate).toLocaleString('ko-KR', {
-              timeZone: 'Asia/Seoul',
-              year: 'numeric', month: '2-digit', day: '2-digit'
-            }) : '날짜 없음',
+            filingDate: filingDate ? toKSTString(filingDate) : '날짜 없음',
             analysis,
             url
           };
@@ -180,7 +191,7 @@ module.exports = async (req, res) => {
           return {
             form: formType,
             formDesc: formDesc,
-            filingDate: filingDate ? new Date(filingDate).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit' }) : '날짜 없음',
+            filingDate: filingDate ? toKSTString(filingDate) : '날짜 없음',
             analysis: null,
             url
           };
