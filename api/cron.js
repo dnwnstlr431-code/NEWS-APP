@@ -279,25 +279,29 @@ async function fetchAndCacheEarnings(stockParam) {
 module.exports = async (req, res) => {
   res.setHeader('Content-Type', 'application/json');
 
-  const stocks = ['palantir', 'iren', 'ionq', 'biomarin'];
+  // stock 파라미터로 종목별 개별 실행 가능
+  // 예: /api/cron?stock=palantir
+  const stockParam = req.query.stock;
+  const stocks = stockParam
+    ? [stockParam]
+    : ['palantir', 'iren', 'ionq', 'biomarin'];
 
-  // 즉시 응답 (타임아웃 방지)
-  res.status(200).json({
+  const results = {};
+
+  for (const stock of stocks) {
+    results[stock] = {};
+    results[stock].news = await fetchAndCacheNews(stock);
+    await new Promise(r => setTimeout(r, 300));
+    results[stock].sec = await fetchAndCacheSec(stock);
+    await new Promise(r => setTimeout(r, 300));
+    results[stock].earnings = await fetchAndCacheEarnings(stock);
+    await new Promise(r => setTimeout(r, 300));
+  }
+
+  return res.status(200).json({
     success: true,
-    message: '캐시 갱신 시작 (백그라운드 처리 중)',
+    message: stockParam ? `${stockParam} 캐시 완료` : '전 종목 캐시 완료',
+    results,
     updatedAt: new Date().toISOString()
   });
-
-  // 응답 후 백그라운드에서 순차 처리
-  (async () => {
-    for (const stock of stocks) {
-      await fetchAndCacheNews(stock);
-      await new Promise(r => setTimeout(r, 500));
-      await fetchAndCacheSec(stock);
-      await new Promise(r => setTimeout(r, 500));
-      await fetchAndCacheEarnings(stock);
-      await new Promise(r => setTimeout(r, 500));
-    }
-    console.log('✅ 전 종목 캐시 갱신 완료:', new Date().toISOString());
-  })();
 };
