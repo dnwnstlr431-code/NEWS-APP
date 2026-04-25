@@ -1,226 +1,130 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>뉴스</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 12px;
-            padding: 35px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-        }
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 20px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid #ecf0f1;
-        }
-        .header-left { flex: 1; }
-        .youtube-link {
-            display: inline-block;
-            font-size: 12px;
-            color: #7f8c8d;
-            text-decoration: none;
-            transition: 0.3s;
-            padding: 5px 8px;
-            border-radius: 4px;
-            margin-bottom: 8px;
-        }
-        .youtube-link:hover { color: #e74c3c; background: rgba(231,76,60,0.05); }
-        h1 { color: #2c3e50; font-size: 28px; font-weight: 700; margin: 0; }
-        .back-btn {
-            background: #3498db;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            transition: 0.3s;
-            white-space: nowrap;
-        }
-        .back-btn:hover { background: #2980b9; transform: scale(1.05); }
-        .update-info {
-            text-align: center;
-            color: #95a5a6;
-            font-size: 13px;
-            margin-bottom: 25px;
-            padding: 10px;
-            background: #f8f9fa;
-            border-radius: 6px;
-        }
-        .update-info span { color: #27ae60; font-weight: 600; }
-        .loading { text-align: center; color: #3498db; font-size: 16px; padding: 60px; font-weight: 500; }
-        .loading-spinner {
-            width: 40px; height: 40px;
-            border: 4px solid #ecf0f1;
-            border-top: 4px solid #3498db;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 15px;
-        }
-        @keyframes spin { 0%{transform:rotate(0deg)} 100%{transform:rotate(360deg)} }
-        #newsList { display: flex; flex-direction: column; gap: 25px; }
-        .news-item {
-            border-left: 4px solid #3498db;
-            padding: 25px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            transition: all 0.3s;
-        }
-        .news-item:hover { background: #ecf0f1; box-shadow: 0 5px 15px rgba(52,152,219,0.2); }
-        .news-date { font-size: 13px; font-weight: 700; color: #e74c3c; letter-spacing: 1px; margin-bottom: 10px; }
-        .news-title { font-size: 18px; font-weight: 700; color: #2c3e50; margin-bottom: 12px; line-height: 1.5; }
-        .news-source { font-size: 12px; color: #95a5a6; margin-bottom: 15px; }
-        .analysis-box {
-            background: white;
-            border-left: 3px solid #9b59b6;
-            padding: 15px;
-            border-radius: 6px;
-            margin: 15px 0;
-            font-size: 14px;
-            line-height: 1.7;
-            color: #444;
-        }
-        .analysis-section-title { font-weight: 700; color: #9b59b6; margin-top: 10px; margin-bottom: 5px; }
-        .news-link {
-            display: inline-block;
-            margin-top: 15px;
-            padding: 10px 15px;
-            background: #3498db;
-            color: white;
-            text-decoration: none;
-            border-radius: 6px;
-            font-size: 13px;
-            font-weight: 600;
-            transition: 0.3s;
-        }
-        .news-link:hover { background: #2980b9; transform: translateY(-2px); }
-        .error { color: #c0392b; text-align: center; padding: 25px; background: #fadbd8; border-radius: 8px; display: none; }
-        .empty { text-align: center; color: #95a5a6; padding: 60px 20px; font-size: 16px; }
+const { Redis } = require('@upstash/redis');
 
-        /* ── 모바일 반응형 ── */
-        @media (max-width: 768px) {
-            body { padding: 0 !important; }
-            .container {
-                border-radius: 0 !important;
-                padding: 16px !important;
-                box-shadow: none !important;
-            }
-            .header {
-                align-items: center !important;
-                margin-bottom: 14px !important;
-                padding-bottom: 14px !important;
-            }
-            .youtube-link { font-size: 11px !important; margin-bottom: 5px !important; }
-            h1 { font-size: 18px !important; white-space: nowrap !important; }
-            .back-btn { padding: 8px 12px !important; font-size: 12px !important; }
-            .update-info { font-size: 11px !important; padding: 8px !important; margin-bottom: 16px !important; }
-            #newsList { gap: 14px !important; }
-            .news-item { padding: 14px !important; }
-            .news-date { font-size: 11px !important; margin-bottom: 7px !important; }
-            .news-title { font-size: 15px !important; margin-bottom: 8px !important; }
-            .news-source { font-size: 11px !important; margin-bottom: 10px !important; }
-            .analysis-box { padding: 12px !important; font-size: 13px !important; margin: 10px 0 !important; }
-            .news-link { padding: 8px 12px !important; font-size: 12px !important; margin-top: 10px !important; }
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <div class="header-left">
-                <a href="https://www.youtube.com/@투자의정석-z2o" target="_blank" class="youtube-link">🎬 투자의정석</a>
-                <h1 id="pageTitle">뉴스</h1>
-            </div>
-            <button class="back-btn" onclick="goHome()">← 돌아가기</button>
-        </div>
-        <div class="update-info" id="updateInfo">⏳ 뉴스를 불러오는 중입니다...</div>
-        <div id="newsList">
-            <div class="loading">
-                <div class="loading-spinner"></div>
-                AI가 뉴스를 분석하고 있습니다...
-            </div>
-        </div>
-        <div class="error" id="error"></div>
-    </div>
-    <script>
-        const params = new URLSearchParams(window.location.search);
-        const stock = params.get('stock');
-        const stockName = params.get('name');
-        if (stockName) document.getElementById('pageTitle').textContent = `${stockName} 뉴스`;
+const redis = new Redis({
+  url: process.env.UPSTASH_REDIS_REST_URL,
+  token: process.env.UPSTASH_REDIS_REST_TOKEN,
+});
 
-        function goHome() { window.location.href = 'index.html'; }
+const stockNames = {
+  'palantir': '팔란티어',
+  'iren': '아이렌',
+  'ionq': '아이온큐',
+  'biomarin': '비트마인'
+};
 
-        function getTimeAgo(isoString) {
-            const diffMins = Math.floor((new Date() - new Date(isoString)) / 60000);
-            const diffHours = Math.floor(diffMins / 60);
-            if (diffMins < 1) return '방금 전';
-            if (diffMins < 60) return `${diffMins}분 전`;
-            if (diffHours < 24) return `${diffHours}시간 전`;
-            return `${Math.floor(diffHours/24)}일 전`;
-        }
+const tickers = {
+  'palantir': 'PLTR',
+  'iren': 'IREN',
+  'ionq': 'IONQ',
+  'biomarin': 'BMNR'
+};
 
-        async function loadNews() {
-            const newsList = document.getElementById('newsList');
-            const updateInfo = document.getElementById('updateInfo');
-            const error = document.getElementById('error');
-            try {
-                const response = await fetch(`/api/news?stock=${stock}`);
-                const data = await response.json();
-                if (!data.success) {
-                    newsList.innerHTML = '';
-                    error.textContent = '❌ 뉴스를 불러올 수 없습니다.';
-                    error.style.display = 'block';
-                    updateInfo.innerHTML = '❌ 업데이트 실패';
-                    return;
-                }
-                if (data.updatedAt) {
-                    updateInfo.innerHTML = `🕐 마지막 업데이트: <span>${getTimeAgo(data.updatedAt)}</span> · 매 1시간마다 자동 갱신`;
-                }
-                if (data.news && data.news.length > 0) {
-                    newsList.innerHTML = data.news.map(item => `
-                        <div class="news-item">
-                            <div class="news-date">📅 ${item.publishedAt}</div>
-                            <div class="news-title">${item.title}</div>
-                            <div class="news-source">📰 ${item.source}</div>
-                            ${item.analysis ? `
-                            <div class="analysis-box">
-                                ${item.analysis
-                                    .replace(/\[([^\]]+)\]/g, '<div class="analysis-section-title">[$1]</div>')
-                                    .replace(/\n/g, '<br>')}
-                            </div>` : `
-                            <div style="color:#555;line-height:1.7;margin:15px 0;font-size:15px;">
-                                ${item.originalContent}
-                            </div>`}
-                            <a href="${item.url}" target="_blank" class="news-link">🔗 원문 보기</a>
-                        </div>
-                    `).join('');
-                } else {
-                    newsList.innerHTML = '<div class="empty">뉴스가 없습니다.</div>';
-                }
-            } catch (err) {
-                newsList.innerHTML = '';
-                error.textContent = '❌ 오류 발생: ' + err.message;
-                error.style.display = 'block';
-                updateInfo.innerHTML = '❌ 업데이트 실패';
-            }
-        }
-        loadNews();
-    </script>
-</body>
-</html>
+module.exports = async (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+
+  const stockParam = req.query.stock || 'palantir';
+  const claudeApiKey = process.env.CLAUDE_API_KEY;
+
+  try {
+    // 캐시 확인
+    const cached = await redis.get(`news:${stockParam}`);
+    if (cached) {
+      const data = typeof cached === 'string' ? JSON.parse(cached) : cached;
+      return res.status(200).json({
+        success: true,
+        news: data.news,
+        updatedAt: data.updatedAt,
+        fromCache: true
+      });
+    }
+
+    const ticker = tickers[stockParam] || 'PLTR';
+    const stockName = stockNames[stockParam] || '팔란티어';
+
+    const rssUrl = `https://finance.yahoo.com/rss/headline?s=${ticker}`;
+    const rssRes = await fetch(rssUrl);
+    const rssText = await rssRes.text();
+    const items = rssText.match(/<item>([\s\S]*?)<\/item>/g) || [];
+
+    const articles = items.slice(0, 5).map(item => {
+      const title = (item.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/) ||
+                     item.match(/<title>(.*?)<\/title>/) || [])[1] || '';
+      const description = (item.match(/<description><!\[CDATA\[(.*?)\]\]><\/description>/) ||
+                           item.match(/<description>(.*?)<\/description>/) || [])[1] || '';
+      const link = (item.match(/<link>(.*?)<\/link>/) || [])[1] || '';
+      const pubDate = (item.match(/<pubDate>(.*?)<\/pubDate>/) || [])[1] || '';
+      return {
+        title: title.trim(),
+        description: description.replace(/<[^>]*>/g, '').trim(),
+        link: link.trim(),
+        pubDate: pubDate.trim()
+      };
+    });
+
+    const news = await Promise.all(articles.map(async (article) => {
+      const originalText = article.description || article.title || '내용 없음';
+      try {
+        const claudeRes = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: {
+            'x-api-key': claudeApiKey,
+            'anthropic-version': '2023-06-01',
+            'content-type': 'application/json'
+          },
+          body: JSON.stringify({
+            model: 'claude-haiku-4-5-20251001',
+            max_tokens: 800,
+            messages: [{
+              role: 'user',
+              content: `다음 뉴스를 분석해줘. 내용이 일부만 제공되더라도 주어진 정보만으로 반드시 분석을 완성해줘. 내용 부족을 언급하지 말고 바로 분석 결과만 답변해줘.
+
+제목: ${article.title}
+내용: ${originalText}
+
+아래 형식으로 한국어로 답변해줘:
+
+[한글 번역]
+(제목과 내용을 자연스러운 한국어로 번역)
+
+[AI 요약]
+(${stockName} 투자자 관점에서 2-3문장으로 핵심 요약)
+
+[투자 영향]
+긍정 / 부정 / 중립 중 하나와 이유 한 줄`
+            }]
+          })
+        });
+        const claudeData = await claudeRes.json();
+        return {
+          title: article.title,
+          originalContent: originalText,
+          analysis: claudeData.content?.[0]?.text || null,
+          source: 'Yahoo Finance',
+          publishedAt: new Date(article.pubDate).toLocaleDateString('ko-KR', {
+            year: 'numeric', month: '2-digit', day: '2-digit',
+            hour: '2-digit', minute: '2-digit'
+          }),
+          url: article.link
+        };
+      } catch {
+        return {
+          title: article.title,
+          originalContent: originalText,
+          analysis: null,
+          source: 'Yahoo Finance',
+          publishedAt: new Date(article.pubDate).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }),
+          url: article.link
+        };
+      }
+    }));
+
+    const updatedAt = new Date().toISOString();
+    await redis.set(`news:${stockParam}`, JSON.stringify({ news, updatedAt }), { ex: 7200 });
+
+    return res.status(200).json({ success: true, news, updatedAt, fromCache: false });
+
+  } catch (error) {
+    return res.status(200).json({ success: false, news: [], error: error.message });
+  }
+};
