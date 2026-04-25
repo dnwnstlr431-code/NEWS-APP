@@ -152,6 +152,8 @@
             color: white;
             box-shadow: 0 4px 12px rgba(30,58,107,0.25);
         }
+        .tab-btn.earnings { background: transparent; color: #e67e22; border: 2px solid #e67e22; }
+        .tab-btn.earnings.active { background: #e67e22; color: white; box-shadow: 0 4px 12px rgba(230,126,34,0.25); }
 
         /* 종목 카드 */
         .stocks-grid {
@@ -186,6 +188,10 @@
 
         .stock-card.sec-mode { background: #E8EEF2; border-color: #B0BEC5 !important; }
         .stock-card.sec-mode:hover { background: #CFD8DC; box-shadow: 0 10px 28px rgba(96,125,139,0.25) !important; }
+        .stock-card.earnings-mode { background: #FEF9F0; border-color: #e67e22 !important; }
+        .stock-card.earnings-mode .stock-code { color: #e67e22 !important; }
+        .stock-card.earnings-mode .stock-name { color: #c0392b !important; }
+        .stock-card.earnings-mode:hover { background: #FDEBD0; box-shadow: 0 10px 28px rgba(230,126,34,0.25) !important; }
 
         .stock-code {
             font-size: 13px;
@@ -337,10 +343,10 @@
 
             .body-wrap { padding: 12px 10px 20px !important; }
 
-            .tabs { gap: 8px !important; margin-bottom: 12px !important; }
+            .tabs { gap: 5px !important; margin-bottom: 12px !important; }
             .tab-btn {
-                padding: 9px 0 !important;
-                font-size: 12px !important;
+                padding: 8px 0 !important;
+                font-size: 10px !important;
                 flex: 1 !important;
                 text-align: center !important;
                 white-space: nowrap !important;
@@ -440,6 +446,7 @@
             <div class="tabs">
                 <button class="tab-btn news active" onclick="switchTab('news')">📰 뉴스</button>
                 <button class="tab-btn sec" onclick="switchTab('sec')">📋 SEC 공시</button>
+                <button class="tab-btn earnings" onclick="switchTab('earnings')">📊 실적발표</button>
             </div>
 
             <div class="stocks-grid">
@@ -468,6 +475,17 @@
                     <span class="feed-header-sub">클릭하면 상세 분석 확인</span>
                 </div>
                 <div class="feed-list" id="newsFeed">
+                    <div class="feed-loading">⏳ 불러오는 중...</div>
+                </div>
+            </div>
+
+            <!-- 최신 실적발표 피드 -->
+            <div class="feed-section">
+                <div class="feed-header" style="background:#e67e22;">
+                    <span class="feed-header-title">📊 최신 실적발표</span>
+                    <span class="feed-header-sub">클릭하면 상세 분석 확인</span>
+                </div>
+                <div class="feed-list" id="earningsFeed">
                     <div class="feed-loading">⏳ 불러오는 중...</div>
                 </div>
             </div>
@@ -526,6 +544,7 @@
                 if (!data.success) { showFeedError(); return; }
                 // 이미 날짜순 정렬된 flat 배열
                 renderNewsFeed(data.news || []);
+                renderEarningsFeed(data.earnings || []);
                 renderSecFeed(data.sec || []);
             } catch (e) { showFeedError(); }
         }
@@ -572,24 +591,64 @@
             }).join('');
         }
 
+        function renderEarningsFeed(items) {
+            const container = document.getElementById('earningsFeed');
+            if (items.length === 0) {
+                container.innerHTML = '<div class="feed-loading">실적 캐시 없음 — 종목 클릭 시 자동 생성됩니다</div>';
+                return;
+            }
+            container.innerHTML = items.map(item => {
+                const info = stockInfo[item.stock];
+                const beatLabel = item.isFuture ? '📅예정'
+                    : item.beatMiss === 'BEAT' ? '🎯초과'
+                    : item.beatMiss === 'MISS' ? '📉미달' : '➡️부합';
+                const beatColor = item.isFuture ? 'background:rgba(52,152,219,0.12);color:#2980b9;'
+                    : item.beatMiss === 'BEAT' ? 'background:rgba(39,174,96,0.12);color:#27ae60;'
+                    : item.beatMiss === 'MISS' ? 'background:rgba(231,76,60,0.12);color:#e74c3c;'
+                    : 'background:rgba(149,165,166,0.12);color:#7f8c8d;';
+                const epsText = item.epsActual !== null && !item.isFuture
+                    ? `실제 EPS ${item.epsActual >= 0 ? '+$' : '-$'}${Math.abs(item.epsActual).toFixed(2)}`
+                    : item.epsEstimate !== null
+                    ? `예상 EPS ${item.epsEstimate >= 0 ? '+$' : '-$'}${Math.abs(item.epsEstimate).toFixed(2)}`
+                    : '실적 데이터';
+                return `
+                <a class="feed-item" href="earnings.html?stock=${item.stock}&name=${info.name}">
+                    <span class="feed-badge" style="${beatColor}">${beatLabel}</span>
+                    <div class="feed-content">
+                        <div class="feed-title">${info.name} · ${epsText}</div>
+                        <div class="feed-sub">${info.ticker} · ${item.hourKo}</div>
+                    </div>
+                    <span class="feed-date">${item.date ? item.date.substring(5) : ''}</span>
+                    <span class="feed-arrow">›</span>
+                </a>`;
+            }).join('');
+        }
+
         function showFeedError() {
             document.getElementById('newsFeed').innerHTML = '<div class="feed-loading">불러오기 실패</div>';
+            document.getElementById('earningsFeed').innerHTML = '<div class="feed-loading">불러오기 실패</div>';
             document.getElementById('secFeed').innerHTML = '<div class="feed-loading">불러오기 실패</div>';
         }
 
         function switchTab(tab) {
             document.querySelector('.tab-btn.news').classList.toggle('active', tab === 'news');
             document.querySelector('.tab-btn.sec').classList.toggle('active', tab === 'sec');
+            document.querySelector('.tab-btn.earnings').classList.toggle('active', tab === 'earnings');
 
             const names = { palantir:'팔란티어', iren:'아이렌', ionq:'아이온큐', biomarin:'비트마인' };
             document.querySelectorAll('.stock-card').forEach(card => {
                 const stock = card.id.replace('card-', '');
                 if (tab === 'news') {
                     card.href = `news.html?stock=${stock}&name=${names[stock]}`;
-                    card.classList.remove('sec-mode');
-                } else {
+                    card.classList.remove('sec-mode', 'earnings-mode');
+                } else if (tab === 'sec') {
                     card.href = `sec.html?stock=${stock}&name=${names[stock]}`;
+                    card.classList.remove('earnings-mode');
                     card.classList.add('sec-mode');
+                } else {
+                    card.href = `earnings.html?stock=${stock}&name=${names[stock]}`;
+                    card.classList.remove('sec-mode');
+                    card.classList.add('earnings-mode');
                 }
             });
         }
