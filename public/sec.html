@@ -128,8 +128,28 @@
         .error { color: #c0392b; text-align: center; padding: 25px; background: #fadbd8; border-radius: 8px; display: none; }
         .empty { text-align: center; color: #95a5a6; padding: 60px 20px; font-size: 16px; }
 
+        /* ── 모바일 플로팅 뒤로가기 ── */
+        .float-back-btn { display: none; }
+
         /* ── 모바일 반응형 ── */
         @media (max-width: 768px) {
+            .float-back-btn {
+                display: block;
+                position: fixed;
+                bottom: 20px;
+                right: 16px;
+                z-index: 999;
+                background: #607D8B;
+                color: white;
+                border: none;
+                padding: 10px 18px;
+                border-radius: 22px;
+                font-size: 13px;
+                font-weight: 700;
+                cursor: pointer;
+                box-shadow: 0 4px 14px rgba(96,125,139,0.4);
+            }
+        }
             body { padding: 0 !important; }
             .container {
                 border-radius: 0 !important;
@@ -173,6 +193,7 @@
         </div>
         <div class="error" id="error"></div>
     </div>
+    <button class="float-back-btn" onclick="goHome()">← 홈</button>
     <script>
         const params = new URLSearchParams(window.location.search);
         const stock = params.get('stock');
@@ -185,17 +206,29 @@
             const secList = document.getElementById('secList');
             const updateInfo = document.getElementById('updateInfo');
             const error = document.getElementById('error');
+
+            // 5초 후 느린 로딩 안내
+            const slowTimer = setTimeout(() => {
+                updateInfo.innerHTML = '⏳ AI가 공시를 분석하고 있습니다. 조금만 기다려주세요 ☕';
+            }, 5000);
+
             try {
-                const response = await fetch(`/api/sec?stock=${stock}`);
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 30000);
+                const response = await fetch(`/api/sec?stock=${stock}`, { signal: controller.signal });
+                clearTimeout(timeoutId);
+                clearTimeout(slowTimer);
+
                 const data = await response.json();
                 if (!data.success) {
                     secList.innerHTML = '';
-                    error.textContent = '❌ 공시를 불러올 수 없습니다: ' + (data.error || '');
+                    error.textContent = '❌ 공시를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.';
                     error.style.display = 'block';
                     updateInfo.innerHTML = '❌ 업데이트 실패';
                     return;
                 }
-                updateInfo.innerHTML = `✅ 최신 SEC 공시 ${data.sec.length}건`;
+                const cacheLabel = data.fromCache ? '🗄️ 캐시 데이터' : '🔄 실시간 데이터';
+                updateInfo.innerHTML = `${cacheLabel} · 최신 SEC 공시 ${data.sec.length}건`;
                 if (data.sec && data.sec.length > 0) {
                     secList.innerHTML = data.sec.map(item => `
                         <div class="sec-item">
@@ -214,11 +247,16 @@
                         </div>
                     `).join('');
                 } else {
-                    secList.innerHTML = '<div class="empty">공시가 없습니다.</div>';
+                    secList.innerHTML = '<div class="empty">📭 현재 표시할 공시가 없습니다. 잠시 후 다시 확인해주세요.</div>';
                 }
             } catch (err) {
+                clearTimeout(slowTimer);
                 secList.innerHTML = '';
-                error.textContent = '❌ 오류 발생: ' + err.message;
+                if (err.name === 'AbortError') {
+                    error.textContent = '⏱️ 로딩 시간이 너무 오래 걸립니다. 페이지를 새로고침해 주세요.';
+                } else {
+                    error.textContent = '❌ 공시를 불러오지 못했습니다. 인터넷 연결을 확인하고 다시 시도해주세요.';
+                }
                 error.style.display = 'block';
                 updateInfo.innerHTML = '❌ 업데이트 실패';
             }
