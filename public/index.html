@@ -410,9 +410,12 @@
         // 방문자 카운트
         async function trackVisitor() {
             try {
-                const res = await fetch('/api/visitors', { method: 'POST' });
+                const alreadyCounted = sessionStorage.getItem('visited');
+                const method = alreadyCounted ? 'GET' : 'POST';
+                const res = await fetch('/api/visitors', { method });
                 const data = await res.json();
                 if (data.success) {
+                    if (!alreadyCounted) sessionStorage.setItem('visited', '1');
                     document.getElementById('todayCount').textContent = data.today.toLocaleString();
                     document.getElementById('totalCount').textContent = data.total.toLocaleString();
                 }
