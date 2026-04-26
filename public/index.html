@@ -158,21 +158,20 @@
         /* 종목 카드 */
         .stocks-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(2, 1fr);
             gap: 16px;
             margin-bottom: 24px;
         }
 
         .stock-card {
-            padding: 28px 16px;
+            padding: 16px;
             border-radius: 12px;
             cursor: pointer;
             transition: all 0.3s ease;
             text-decoration: none;
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            align-items: center;
+            align-items: stretch;
             background: white;
             border: 2px solid transparent;
             box-shadow: 0 2px 10px rgba(0,0,0,0.06);
@@ -194,10 +193,10 @@
         .stock-card.earnings-mode:hover { background: #FDEBD0; box-shadow: 0 10px 28px rgba(230,126,34,0.25) !important; }
 
         .stock-code {
-            font-size: 13px;
+            font-size: 11px;
             font-weight: 700;
             letter-spacing: 2px;
-            margin-bottom: 7px;
+            margin-bottom: 3px;
         }
         .stock-card.pltr .stock-code { color: #1E3A6B; }
         .stock-card.iren .stock-code { color: #B8891A; }
@@ -206,14 +205,73 @@
         .stock-card.sec-mode .stock-code { color: #37474F; }
 
         .stock-name {
-            font-size: 18px;
+            font-size: 15px;
             font-weight: 700;
             color: #1E3A6B;
-            text-align: center;
         }
         .stock-card.sec-mode .stock-name { color: #37474F; }
 
-
+        /* ── 종목카드 내부 요소 ── */
+        .sc-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 7px;
+        }
+        .sc-price-wrap { text-align: right; }
+        .sc-price {
+            font-size: 16px;
+            font-weight: 700;
+            color: #2c3e50;
+            line-height: 1.2;
+        }
+        .sc-change {
+            font-size: 11px;
+            font-weight: 700;
+            color: #95a5a6;
+        }
+        .sc-change.up { color: #27ae60; }
+        .sc-change.down { color: #e74c3c; }
+        .sc-desc {
+            font-size: 10px;
+            color: #7A6A4F;
+            line-height: 1.4;
+            margin-bottom: 9px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            min-height: 14px;
+        }
+        .sc-data-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 5px;
+            border-top: 1px solid #f2f2f2;
+            padding-top: 8px;
+        }
+        .sc-data-cell {
+            background: #f8f9fa;
+            border-radius: 5px;
+            padding: 5px 7px;
+        }
+        .sc-data-label {
+            font-size: 9px;
+            color: #95a5a6;
+            font-weight: 600;
+            margin-bottom: 2px;
+            white-space: nowrap;
+        }
+        .sc-data-val {
+            font-size: 12px;
+            font-weight: 700;
+            color: #2c3e50;
+            white-space: nowrap;
+        }
+        .sc-dday-val { color: #3498db; }
+        .stock-card.sec-mode .sc-data-cell,
+        .stock-card.earnings-mode .sc-data-cell { background: rgba(255,255,255,0.7); }
+        .stock-card.sec-mode .sc-data-grid { border-top-color: #c8d4d9; }
+        .stock-card.earnings-mode .sc-data-grid { border-top-color: #f0dcc0; }
 
         .footer {
             text-align: center;
@@ -333,17 +391,24 @@
             }
 
             .stocks-grid {
-                grid-template-columns: repeat(4, 1fr) !important;
-                gap: 6px !important;
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 8px !important;
                 margin-bottom: 14px !important;
             }
             .stock-card {
-                padding: 10px 4px !important;
+                padding: 11px 10px !important;
                 border-radius: 8px !important;
                 border-width: 1.5px !important;
             }
-            .stock-code { font-size: 9px !important; letter-spacing: 0.5px !important; margin-bottom: 3px !important; }
-            .stock-name { font-size: 11px !important; }
+            .stock-code { font-size: 9px !important; letter-spacing: 1px !important; }
+            .stock-name { font-size: 13px !important; }
+            .sc-price { font-size: 13px !important; }
+            .sc-change { font-size: 10px !important; }
+            .sc-desc { font-size: 9px !important; margin-bottom: 7px !important; }
+            .sc-data-grid { gap: 4px !important; padding-top: 6px !important; }
+            .sc-data-cell { padding: 4px 5px !important; }
+            .sc-data-label { font-size: 8px !important; }
+            .sc-data-val { font-size: 11px !important; }
 
             .info-card { border-radius: 8px !important; margin-bottom: 10px !important; }
             .info-card-header { padding: 9px 12px !important; font-size: 12px !important; }
@@ -428,20 +493,76 @@
 
             <div class="stocks-grid">
                 <a href="news.html?stock=palantir&name=팔란티어" class="stock-card pltr" id="card-palantir">
-                    <div class="stock-code">PLTR</div>
-                    <div class="stock-name">팔란티어</div>
+                    <div class="sc-top">
+                        <div><div class="stock-code">PLTR</div><div class="stock-name">팔란티어</div></div>
+                        <div class="sc-price-wrap">
+                            <div class="sc-price" id="price-palantir">-</div>
+                            <div class="sc-change" id="change-palantir">-</div>
+                        </div>
+                    </div>
+                    <div class="sc-desc" id="desc-palantir"></div>
+                    <div class="sc-data-grid">
+                        <div class="sc-data-cell"><div class="sc-data-label">52주 고가</div><div class="sc-data-val" id="w52h-palantir">-</div></div>
+                        <div class="sc-data-cell"><div class="sc-data-label">52주 저가</div><div class="sc-data-val" id="w52l-palantir">-</div></div>
+                        <div class="sc-data-cell"><div class="sc-data-label">목표주가</div><div class="sc-data-val" id="target-palantir">-</div></div>
+                        <div class="sc-data-cell"><div class="sc-data-label">공매도</div><div class="sc-data-val" id="short-palantir">-</div></div>
+                        <div class="sc-data-cell"><div class="sc-data-label">기관비중</div><div class="sc-data-val" id="inst-palantir">-</div></div>
+                        <div class="sc-data-cell"><div class="sc-data-label">실적 D-day</div><div class="sc-data-val sc-dday-val" id="dday-palantir">-</div></div>
+                    </div>
                 </a>
                 <a href="news.html?stock=iren&name=아이렌" class="stock-card iren" id="card-iren">
-                    <div class="stock-code">IREN</div>
-                    <div class="stock-name">아이렌</div>
+                    <div class="sc-top">
+                        <div><div class="stock-code">IREN</div><div class="stock-name">아이렌</div></div>
+                        <div class="sc-price-wrap">
+                            <div class="sc-price" id="price-iren">-</div>
+                            <div class="sc-change" id="change-iren">-</div>
+                        </div>
+                    </div>
+                    <div class="sc-desc" id="desc-iren"></div>
+                    <div class="sc-data-grid">
+                        <div class="sc-data-cell"><div class="sc-data-label">52주 고가</div><div class="sc-data-val" id="w52h-iren">-</div></div>
+                        <div class="sc-data-cell"><div class="sc-data-label">52주 저가</div><div class="sc-data-val" id="w52l-iren">-</div></div>
+                        <div class="sc-data-cell"><div class="sc-data-label">목표주가</div><div class="sc-data-val" id="target-iren">-</div></div>
+                        <div class="sc-data-cell"><div class="sc-data-label">공매도</div><div class="sc-data-val" id="short-iren">-</div></div>
+                        <div class="sc-data-cell"><div class="sc-data-label">기관비중</div><div class="sc-data-val" id="inst-iren">-</div></div>
+                        <div class="sc-data-cell"><div class="sc-data-label">실적 D-day</div><div class="sc-data-val sc-dday-val" id="dday-iren">-</div></div>
+                    </div>
                 </a>
                 <a href="news.html?stock=ionq&name=아이온큐" class="stock-card ionq" id="card-ionq">
-                    <div class="stock-code">IONQ</div>
-                    <div class="stock-name">아이온큐</div>
+                    <div class="sc-top">
+                        <div><div class="stock-code">IONQ</div><div class="stock-name">아이온큐</div></div>
+                        <div class="sc-price-wrap">
+                            <div class="sc-price" id="price-ionq">-</div>
+                            <div class="sc-change" id="change-ionq">-</div>
+                        </div>
+                    </div>
+                    <div class="sc-desc" id="desc-ionq"></div>
+                    <div class="sc-data-grid">
+                        <div class="sc-data-cell"><div class="sc-data-label">52주 고가</div><div class="sc-data-val" id="w52h-ionq">-</div></div>
+                        <div class="sc-data-cell"><div class="sc-data-label">52주 저가</div><div class="sc-data-val" id="w52l-ionq">-</div></div>
+                        <div class="sc-data-cell"><div class="sc-data-label">목표주가</div><div class="sc-data-val" id="target-ionq">-</div></div>
+                        <div class="sc-data-cell"><div class="sc-data-label">공매도</div><div class="sc-data-val" id="short-ionq">-</div></div>
+                        <div class="sc-data-cell"><div class="sc-data-label">기관비중</div><div class="sc-data-val" id="inst-ionq">-</div></div>
+                        <div class="sc-data-cell"><div class="sc-data-label">실적 D-day</div><div class="sc-data-val sc-dday-val" id="dday-ionq">-</div></div>
+                    </div>
                 </a>
                 <a href="news.html?stock=biomarin&name=비트마인" class="stock-card bmnr" id="card-biomarin">
-                    <div class="stock-code">BMNR</div>
-                    <div class="stock-name">비트마인</div>
+                    <div class="sc-top">
+                        <div><div class="stock-code">BMNR</div><div class="stock-name">비트마인</div></div>
+                        <div class="sc-price-wrap">
+                            <div class="sc-price" id="price-biomarin">-</div>
+                            <div class="sc-change" id="change-biomarin">-</div>
+                        </div>
+                    </div>
+                    <div class="sc-desc" id="desc-biomarin"></div>
+                    <div class="sc-data-grid">
+                        <div class="sc-data-cell"><div class="sc-data-label">52주 고가</div><div class="sc-data-val" id="w52h-biomarin">-</div></div>
+                        <div class="sc-data-cell"><div class="sc-data-label">52주 저가</div><div class="sc-data-val" id="w52l-biomarin">-</div></div>
+                        <div class="sc-data-cell"><div class="sc-data-label">목표주가</div><div class="sc-data-val" id="target-biomarin">-</div></div>
+                        <div class="sc-data-cell"><div class="sc-data-label">공매도</div><div class="sc-data-val" id="short-biomarin">-</div></div>
+                        <div class="sc-data-cell"><div class="sc-data-label">기관비중</div><div class="sc-data-val" id="inst-biomarin">-</div></div>
+                        <div class="sc-data-cell"><div class="sc-data-label">실적 D-day</div><div class="sc-data-val sc-dday-val" id="dday-biomarin">-</div></div>
+                    </div>
                 </a>
             </div>
 
@@ -570,8 +691,60 @@ function switchTab(tab) {
             }
         }
 
+        // 주가 & 보조지표 로드
+        const stockKeys = ['palantir', 'iren', 'ionq', 'biomarin'];
+
+        function fmtPrice(v) { return v != null ? '$' + v.toFixed(2) : '-'; }
+        function fmtMoney(v) { return v != null ? '$' + v.toFixed(2) : '-'; }
+        function fmtPct(v) { return v != null ? v.toFixed(1) + '%' : '-'; }
+        function fmtRatio(v) { return v != null ? v.toFixed(1) + '일' : '-'; }
+        function fmtDDay(v) { return v != null ? (v === 0 ? 'D-Day!' : 'D-' + v) : '-'; }
+
+        async function loadStockData() {
+            try {
+                const [priceRes, infoRes] = await Promise.all([
+                    fetch('/api/stock-price').then(r => r.json()).catch(() => ({})),
+                    fetch('/api/stock-info').then(r => r.json()).catch(() => ({})),
+                ]);
+
+                const prices = priceRes.prices || {};
+                const info = infoRes.info || {};
+
+                for (const key of stockKeys) {
+                    const p = prices[key];
+                    const d = info[key];
+
+                    if (p) {
+                        const priceEl = document.getElementById('price-' + key);
+                        const changeEl = document.getElementById('change-' + key);
+                        if (priceEl) priceEl.textContent = fmtPrice(p.price);
+                        if (changeEl) {
+                            const cp = p.changePercent;
+                            const sign = cp >= 0 ? '+' : '';
+                            changeEl.textContent = cp != null ? sign + cp.toFixed(2) + '%' : '-';
+                            changeEl.className = 'sc-change' + (cp > 0 ? ' up' : cp < 0 ? ' down' : '');
+                        }
+                    }
+
+                    if (d) {
+                        const descEl = document.getElementById('desc-' + key);
+                        if (descEl) descEl.textContent = d.description || '';
+
+                        const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+                        set('w52h-' + key, fmtMoney(d.week52High));
+                        set('w52l-' + key, fmtMoney(d.week52Low));
+                        set('target-' + key, fmtMoney(d.targetMean));
+                        set('short-' + key, fmtRatio(d.shortRatio));
+                        set('inst-' + key, fmtPct(d.institutionalOwnership));
+                        set('dday-' + key, fmtDDay(d.dDay));
+                    }
+                }
+            } catch {}
+        }
+
         loadFeed();
         trackVisitor();
+        loadStockData();
     </script>
 </body>
 </html>
