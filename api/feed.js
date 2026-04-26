@@ -69,7 +69,7 @@ module.exports = async (req, res) => {
       const newsRaw = newsCache[stock];
       if (newsRaw) {
         const d = typeof newsRaw === 'string' ? JSON.parse(newsRaw) : newsRaw;
-        (d.news || []).slice(0, 3).forEach(item => {
+        (d.news || []).slice(0, 1).forEach(item => {
           const title = extractKoreanTitle(item.analysis, item.title);
           items.push({
             type: 'news',
@@ -87,7 +87,7 @@ module.exports = async (req, res) => {
       const secRaw = secCache[stock];
       if (secRaw) {
         const d = typeof secRaw === 'string' ? JSON.parse(secRaw) : secRaw;
-        (d.sec || []).slice(0, 2).forEach(item => {
+        (d.sec || []).slice(0, 1).forEach(item => {
           items.push({
             type: 'sec',
             ticker: meta.ticker,
@@ -104,7 +104,7 @@ module.exports = async (req, res) => {
       const earningsRaw = earningsCache[stock];
       if (earningsRaw) {
         const d = typeof earningsRaw === 'string' ? JSON.parse(earningsRaw) : earningsRaw;
-        (d.earnings || []).slice(0, 2).forEach(item => {
+        (d.earnings || []).slice(0, 1).forEach(item => {
           const label = item.isFuture
             ? '📅 실적 발표 예정'
             : (beatMissLabel[item.beatMiss] || '📊 실적 발표');
@@ -121,9 +121,12 @@ module.exports = async (req, res) => {
       }
     }
 
-    // 날짜 최신순 정렬 후 상위 15개
-    items.sort((a, b) => b.sortDate - a.sortDate);
-    const feed = items.filter(i => i.sortDate > 0).slice(0, 15);
+    // 섹션별(type) 정렬 후 각 섹션 내 날짜 최신순
+    items.sort((a, b) => {
+      if (a.type !== b.type) return 0;
+      return b.sortDate - a.sortDate;
+    });
+    const feed = items;
 
     return res.status(200).json({ success: true, feed });
   } catch (error) {
