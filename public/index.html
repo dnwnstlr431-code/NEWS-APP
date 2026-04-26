@@ -222,23 +222,23 @@
             margin-top: 8px;
         }
 
-        /* ── 통합 피드 ── */
-        .feed-section {
+        /* ── 정보 카드 (뉴스·SEC·실적) ── */
+        .info-card {
             background: white;
             border-radius: 12px;
             overflow: hidden;
             box-shadow: 0 2px 10px rgba(0,0,0,0.06);
             margin-bottom: 16px;
         }
-        .feed-header {
+        .info-card-header {
             padding: 12px 16px;
-            background: #1E3A6B;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+            font-size: 14px;
+            font-weight: 700;
+            color: white;
         }
-        .feed-header-title { font-size: 14px; font-weight: 700; color: white; }
-        .feed-header-sub { font-size: 11px; color: rgba(255,255,255,0.65); }
+        .info-card-header.news     { background: #1E3A6B; }
+        .info-card-header.sec      { background: #607D8B; }
+        .info-card-header.earnings { background: #e67e22; }
         .feed-item {
             display: flex;
             align-items: center;
@@ -276,15 +276,6 @@
         }
         .feed-date { font-size: 11px; color: #bbb; margin-top: 2px; }
         .feed-arrow { color: #ccc; font-size: 18px; font-weight: 300; }
-        .feed-section-label {
-            padding: 8px 14px;
-            background: #f4f6f8;
-            font-size: 12px;
-            font-weight: 700;
-            color: #555;
-            border-top: 1px solid #eee;
-            border-bottom: 1px solid #eee;
-        }
         .feed-empty { text-align: center; color: #aaa; padding: 28px 16px; font-size: 13px; line-height: 1.7; }
 
         /* ── 모바일 반응형 ── */
@@ -354,24 +345,16 @@
             .stock-code { font-size: 9px !important; letter-spacing: 0.5px !important; margin-bottom: 3px !important; }
             .stock-name { font-size: 11px !important; }
 
-            .feed-section { border-radius: 8px !important; margin-bottom: 10px !important; }
-            .feed-header { padding: 9px 12px !important; }
-            .feed-header-title { font-size: 12px !important; }
-            .feed-header-sub { display: none !important; }
+            .info-card { border-radius: 8px !important; margin-bottom: 10px !important; }
+            .info-card-header { padding: 9px 12px !important; font-size: 12px !important; }
 
-            .feed-item { padding: 9px 10px !important; gap: 7px !important; }
+            .feed-item { padding: 9px 10px !important; gap: 6px !important; }
             .feed-badge { font-size: 8px !important; padding: 2px 5px !important; min-width: 32px !important; }
             .feed-title { font-size: 12px !important; }
-            .feed-sub { font-size: 10px !important; }
             .feed-date { font-size: 10px !important; }
             .feed-arrow { font-size: 13px !important; }
 
             .footer { font-size: 11px !important; margin-top: 6px !important; }
-            .feed-header-title { font-size: 12px !important; }
-            .feed-item { padding: 9px 10px !important; gap: 6px !important; }
-            .feed-badge { font-size: 9px !important; padding: 2px 5px !important; }
-            .feed-title { font-size: 12px !important; }
-            .feed-date { font-size: 10px !important; }
         }
     </style>
 </head>
@@ -464,15 +447,22 @@
 
 
 
-            <!-- 통합 피드 -->
-            <div class="feed-section">
-                <div class="feed-header">
-                    <span class="feed-header-title">📋 통합 최신 피드</span>
-                    <span class="feed-header-sub">뉴스 · SEC공시 · 실적발표</span>
-                </div>
-                <div id="feedList">
-                    <div class="feed-empty">⏳ 불러오는 중...</div>
-                </div>
+            <!-- 최신 뉴스 카드 -->
+            <div class="info-card">
+                <div class="info-card-header news">📰 최신 뉴스</div>
+                <div id="feed-news"><div class="feed-empty">⏳ 불러오는 중...</div></div>
+            </div>
+
+            <!-- SEC 공시 카드 -->
+            <div class="info-card">
+                <div class="info-card-header sec">📋 SEC 공시</div>
+                <div id="feed-sec"><div class="feed-empty">⏳ 불러오는 중...</div></div>
+            </div>
+
+            <!-- 실적 발표 카드 -->
+            <div class="info-card">
+                <div class="info-card-header earnings">📊 실적 발표</div>
+                <div id="feed-earnings"><div class="feed-empty">⏳ 불러오는 중...</div></div>
             </div>
 
             <div class="footer">💡 Yahoo Finance 실시간 수집 · Claude AI 분석</div>
@@ -540,46 +530,43 @@ function switchTab(tab) {
         const savedTab = location.hash.replace('#', '');
         if (['sec', 'earnings'].includes(savedTab)) switchTab(savedTab);
 
-        // 통합 피드 로드
+        // 카드별 피드 로드
         async function loadFeed() {
-            const feedList = document.getElementById('feedList');
+            const EMPTY = '<div class="feed-empty">📌 종목 카드를 한 번씩 클릭하면<br>최신 정보가 여기에 표시됩니다.</div>';
+            const tickerBadge = { PLTR: 'badge-pltr', IREN: 'badge-iren', IONQ: 'badge-ionq', BMNR: 'badge-bmnr' };
+
+            function renderItems(items) {
+                if (!items.length) return EMPTY;
+                return items.map(item => `
+                    <a href="${item.url}" class="feed-item">
+                        <span class="feed-badge ${tickerBadge[item.ticker]}">${item.ticker}</span>
+                        <div class="feed-content">
+                            <div class="feed-title">${item.title}</div>
+                            <div class="feed-date">${item.date}</div>
+                        </div>
+                        <span class="feed-arrow">›</span>
+                    </a>
+                `).join('');
+            }
+
             try {
                 const res = await fetch('/api/feed');
                 const data = await res.json();
 
-                const EMPTY = '<div class="feed-empty">📌 종목 카드를 한 번씩 클릭하면<br>최신 정보가 여기에 표시됩니다.</div>';
                 if (!data.success || !data.feed || data.feed.length === 0) {
-                    feedList.innerHTML = EMPTY;
+                    ['feed-news', 'feed-sec', 'feed-earnings'].forEach(id => {
+                        document.getElementById(id).innerHTML = EMPTY;
+                    });
                     return;
                 }
 
-                const sections = [
-                    { type: 'news',     label: '📰 최신 뉴스' },
-                    { type: 'sec',      label: '📋 SEC 공시' },
-                    { type: 'earnings', label: '📊 실적 발표' },
-                ];
-                const tickerBadge = { PLTR: 'badge-pltr', IREN: 'badge-iren', IONQ: 'badge-ionq', BMNR: 'badge-bmnr' };
-
-                let html = '';
-                sections.forEach(({ type, label }) => {
-                    const items = data.feed.filter(i => i.type === type);
-                    if (!items.length) return;
-                    html += `<div class="feed-section-label">${label}</div>`;
-                    html += items.map(item => `
-                        <a href="${item.url}" class="feed-item">
-                            <span class="feed-badge ${tickerBadge[item.ticker]}">${item.ticker}</span>
-                            <div class="feed-content">
-                                <div class="feed-title">${item.title}</div>
-                                <div class="feed-date">${item.date}</div>
-                            </div>
-                            <span class="feed-arrow">›</span>
-                        </a>
-                    `).join('');
-                });
-
-                feedList.innerHTML = html || EMPTY;
+                document.getElementById('feed-news').innerHTML     = renderItems(data.feed.filter(i => i.type === 'news'));
+                document.getElementById('feed-sec').innerHTML      = renderItems(data.feed.filter(i => i.type === 'sec'));
+                document.getElementById('feed-earnings').innerHTML = renderItems(data.feed.filter(i => i.type === 'earnings'));
             } catch {
-                feedList.innerHTML = '<div class="feed-empty">📌 종목 카드를 한 번씩 클릭하면<br>최신 정보가 여기에 표시됩니다.</div>';
+                ['feed-news', 'feed-sec', 'feed-earnings'].forEach(id => {
+                    document.getElementById(id).innerHTML = EMPTY;
+                });
             }
         }
 
