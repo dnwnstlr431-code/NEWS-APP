@@ -1,0 +1,457 @@
+<!-- v5 -->
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>실시간 미국주식 | 투자의정석</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background: #EDE0C4;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container { max-width: 1000px; margin: 0 auto; }
+
+        .app-wrap {
+            background: #F5EDD8;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+
+        /* ── 히어로 헤더 ── */
+        .hero {
+            position: relative;
+            background: #F0E4C4;
+            padding: 28px 28px 24px;
+            overflow: hidden;
+        }
+
+        .hero-bg {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.18;
+        }
+
+        .hero-overlay {
+            position: absolute; inset: 0;
+            background: linear-gradient(to bottom, rgba(240,228,196,0) 50%, rgba(245,237,216,1) 100%);
+        }
+
+        .hero-content {
+            position: relative; z-index: 2;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .hero-spacer { min-width: 72px; }
+        .hero-center { flex: 1; text-align: center; }
+        .hero-right {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            min-width: 72px;
+        }
+
+        .app-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1E3A6B;
+            letter-spacing: -0.5px;
+            margin-bottom: 5px;
+        }
+
+        .app-subtitle {
+            font-size: 13px;
+            color: #7A6A4F;
+            margin-bottom: 14px;
+        }
+
+        /* 유튜브 버튼 */
+        .yt-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+        }
+        .yt-icon-wrap {
+            width: 52px; height: 52px;
+            background: #FF0000;
+            border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 14px rgba(255,0,0,0.28);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .yt-icon-wrap:hover {
+            transform: scale(1.08);
+            box-shadow: 0 6px 18px rgba(255,0,0,0.35);
+        }
+        .yt-label {
+            font-size: 10px;
+            font-weight: 700;
+            color: #1E3A6B;
+            text-align: center;
+        }
+
+        /* 방문자 통계 */
+        .visitor-bar {
+            display: inline-flex;
+            gap: 18px;
+            background: rgba(255,255,255,0.85);
+            padding: 8px 20px;
+            border-radius: 28px;
+            font-size: 12px;
+            border: 1px solid rgba(30,58,107,0.1);
+        }
+        .v-item { display: flex; align-items: center; gap: 5px; color: #7A6A4F; }
+        .v-num { font-weight: 700; color: #1E3A6B; font-size: 14px; }
+        .v-div { width: 1px; background: #D8C9A8; margin: 2px 0; }
+
+        /* ── 바디 ── */
+        .body-wrap { padding: 20px 24px 28px; }
+
+        /* 탭 */
+        .tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
+        .tab-btn {
+            padding: 11px 36px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .tab-btn.news {
+            background: #1E3A6B;
+            color: white;
+            border: 2px solid #1E3A6B;
+            box-shadow: 0 4px 12px rgba(30,58,107,0.25);
+        }
+        .tab-btn.news:not(.active) {
+            background: white;
+            color: #1E3A6B;
+            box-shadow: none;
+        }
+        .tab-btn.sec {
+            background: transparent;
+            color: #1E3A6B;
+            border: 2px solid #1E3A6B;
+        }
+        .tab-btn.sec.active {
+            background: #1E3A6B;
+            color: white;
+            box-shadow: 0 4px 12px rgba(30,58,107,0.25);
+        }
+        .tab-btn.earnings { background: transparent; color: #e67e22; border: 2px solid #e67e22; }
+        .tab-btn.earnings.active { background: #e67e22; color: white; box-shadow: 0 4px 12px rgba(230,126,34,0.25); }
+
+        /* 종목 카드 */
+        .stocks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stock-card {
+            padding: 28px 16px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: white;
+            border: 2px solid transparent;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+        }
+        .stock-card.pltr { border-color: #1E3A6B; }
+        .stock-card.pltr:hover { transform: translateY(-6px); box-shadow: 0 10px 28px rgba(30,58,107,0.2); }
+        .stock-card.iren { border-color: #E8B84B; }
+        .stock-card.iren:hover { transform: translateY(-6px); box-shadow: 0 10px 28px rgba(232,184,75,0.25); }
+        .stock-card.ionq { border-color: #5B7FA6; }
+        .stock-card.ionq:hover { transform: translateY(-6px); box-shadow: 0 10px 28px rgba(91,127,166,0.25); }
+        .stock-card.bmnr { border-color: #7BAE85; }
+        .stock-card.bmnr:hover { transform: translateY(-6px); box-shadow: 0 10px 28px rgba(123,174,133,0.25); }
+
+        .stock-card.sec-mode { background: #E8EEF2; border-color: #B0BEC5 !important; }
+        .stock-card.sec-mode:hover { background: #CFD8DC; box-shadow: 0 10px 28px rgba(96,125,139,0.25) !important; }
+        .stock-card.earnings-mode { background: #FEF9F0; border-color: #e67e22 !important; }
+        .stock-card.earnings-mode .stock-code { color: #e67e22 !important; }
+        .stock-card.earnings-mode .stock-name { color: #c0392b !important; }
+        .stock-card.earnings-mode:hover { background: #FDEBD0; box-shadow: 0 10px 28px rgba(230,126,34,0.25) !important; }
+
+        .stock-code {
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            margin-bottom: 7px;
+        }
+        .stock-card.pltr .stock-code { color: #1E3A6B; }
+        .stock-card.iren .stock-code { color: #B8891A; }
+        .stock-card.ionq .stock-code { color: #3D6080; }
+        .stock-card.bmnr .stock-code { color: #4A7A55; }
+        .stock-card.sec-mode .stock-code { color: #37474F; }
+
+        .stock-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1E3A6B;
+            text-align: center;
+        }
+        .stock-card.sec-mode .stock-name { color: #37474F; }
+
+
+
+        .footer {
+            text-align: center;
+            color: #B0A080;
+            font-size: 12px;
+            margin-top: 8px;
+        }
+
+        /* ── 모바일 반응형 ── */
+        @media (max-width: 768px) {
+            body { padding: 0 !important; }
+            .app-wrap { border-radius: 0 !important; }
+
+            .hero { padding: 14px !important; position: relative !important; }
+
+            .hero-content {
+                flex-direction: column !important;
+                align-items: center !important;
+                gap: 8px !important;
+            }
+
+            .hero-spacer { display: none !important; }
+            .hero-center { width: 100% !important; }
+
+            .hero-right {
+                position: absolute !important;
+                top: 14px !important;
+                right: 14px !important;
+                min-width: unset !important;
+                gap: 3px !important;
+            }
+            .yt-icon-wrap { width: 32px !important; height: 32px !important; border-radius: 8px !important; }
+            .yt-label { font-size: 8px !important; }
+
+            .app-title {
+                font-size: 20px !important;
+                white-space: nowrap !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+            }
+            .app-subtitle {
+                font-size: 11px !important;
+                margin-bottom: 10px !important;
+                white-space: nowrap !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+            }
+
+            .visitor-bar { padding: 6px 14px !important; gap: 12px !important; font-size: 11px !important; }
+            .v-num { font-size: 12px !important; }
+
+            .body-wrap { padding: 12px 10px 20px !important; }
+
+            .tabs { gap: 5px !important; margin-bottom: 12px !important; }
+            .tab-btn {
+                padding: 8px 0 !important;
+                font-size: 10px !important;
+                flex: 1 !important;
+                text-align: center !important;
+                white-space: nowrap !important;
+            }
+
+            .stocks-grid {
+                grid-template-columns: repeat(4, 1fr) !important;
+                gap: 6px !important;
+                margin-bottom: 14px !important;
+            }
+            .stock-card {
+                padding: 10px 4px !important;
+                border-radius: 8px !important;
+                border-width: 1.5px !important;
+            }
+            .stock-code { font-size: 9px !important; letter-spacing: 0.5px !important; margin-bottom: 3px !important; }
+            .stock-name { font-size: 11px !important; }
+
+            .feed-section { border-radius: 8px !important; margin-bottom: 10px !important; }
+            .feed-header { padding: 9px 12px !important; }
+            .feed-header-title { font-size: 12px !important; }
+            .feed-header-sub { display: none !important; }
+
+            .feed-item { padding: 9px 10px !important; gap: 7px !important; }
+            .feed-badge { font-size: 8px !important; padding: 2px 5px !important; min-width: 32px !important; }
+            .feed-title { font-size: 12px !important; }
+            .feed-sub { font-size: 10px !important; }
+            .feed-date { font-size: 10px !important; }
+            .feed-arrow { font-size: 13px !important; }
+
+            .footer { font-size: 11px !important; margin-top: 6px !important; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+    <div class="app-wrap">
+
+        <!-- 히어로 헤더 -->
+        <div class="hero">
+            <svg class="hero-bg" viewBox="0 0 700 160" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="65" cy="42" r="24" fill="#E8B84B"/>
+                <text x="65" y="49" text-anchor="middle" font-size="15" fill="#C89A2E" font-weight="bold">₩</text>
+                <circle cx="620" cy="32" r="20" fill="#E8B84B"/>
+                <text x="620" y="39" text-anchor="middle" font-size="13" fill="#C89A2E" font-weight="bold">$</text>
+                <circle cx="565" cy="118" r="15" fill="#E8B84B"/>
+                <text x="565" y="124" text-anchor="middle" font-size="10" fill="#C89A2E" font-weight="bold">₩</text>
+                <rect x="28" y="82" width="74" height="40" rx="5" fill="#E8B84B" opacity="0.7" transform="rotate(-12 65 102)"/>
+                <text x="65" y="107" text-anchor="middle" font-size="11" fill="#C89A2E" transform="rotate(-12 65 102)">₩</text>
+                <rect x="545" y="58" width="84" height="42" rx="5" fill="#E8B84B" opacity="0.6" transform="rotate(8 587 79)"/>
+                <text x="587" y="83" text-anchor="middle" font-size="11" fill="#C89A2E" transform="rotate(8 587 79)">$</text>
+                <polyline points="400,148 445,112 478,126 532,72 580,84" fill="none" stroke="#E8B84B" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <polygon points="578,68 594,82 572,86" fill="#E8B84B"/>
+                <text x="155" y="30" font-size="17" fill="#E8B84B" opacity="0.8">✦</text>
+                <text x="360" y="52" font-size="11" fill="#E8B84B" opacity="0.6">✦</text>
+                <text x="280" y="148" font-size="13" fill="#E8B84B" opacity="0.5">✦</text>
+                <text x="660" y="138" font-size="9" fill="#E8B84B" opacity="0.7">✦</text>
+                <text x="490" y="30" font-size="8" fill="#E8B84B" opacity="0.5">✦</text>
+            </svg>
+            <div class="hero-overlay"></div>
+
+            <div class="hero-content">
+                <div class="hero-spacer"></div>
+
+                <div class="hero-center">
+                    <div class="app-title">📊 실시간 미국주식</div>
+                    <div class="app-subtitle">종목을 선택하면 최신 정보를 확인할 수 있습니다</div>
+                    <div class="visitor-bar">
+                        <div class="v-item">
+                            <span>👤</span><span>오늘</span>
+                            <span class="v-num" id="todayCount">-</span><span>명</span>
+                        </div>
+                        <div class="v-div"></div>
+                        <div class="v-item">
+                            <span>📈</span><span>누적</span>
+                            <span class="v-num" id="totalCount">-</span><span>명</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="hero-right">
+                    <a class="yt-btn" href="https://www.youtube.com/@투자의정석-z2o" target="_blank">
+                        <div class="yt-icon-wrap">
+                            <svg width="28" height="20" viewBox="0 0 26 18" fill="none">
+                                <path d="M25.4 2.8A3.26 3.26 0 0023.1.5C21.1 0 13 0 13 0S4.9 0 2.9.5A3.26 3.26 0 00.6 2.8C0 4.8 0 9 0 9s0 4.2.6 6.2a3.26 3.26 0 002.3 2.3C4.9 18 13 18 13 18s8.1 0 10.1-.5a3.26 3.26 0 002.3-2.3C26 13.2 26 9 26 9s0-4.2-.6-6.2z" fill="white"/>
+                                <path d="M10.4 12.9l6.7-3.9-6.7-3.9v7.8z" fill="#FF0000"/>
+                            </svg>
+                        </div>
+                        <div class="yt-label">투자의정석</div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 바디 -->
+        <div class="body-wrap">
+            <div class="tabs">
+                <button class="tab-btn news active" onclick="switchTab('news')">📰 뉴스</button>
+                <button class="tab-btn sec" onclick="switchTab('sec')">📋 SEC 공시</button>
+                <button class="tab-btn earnings" onclick="switchTab('earnings')">📊 실적발표</button>
+            </div>
+
+            <div class="stocks-grid">
+                <a href="news.html?stock=palantir&name=팔란티어" class="stock-card pltr" id="card-palantir">
+                    <div class="stock-code">PLTR</div>
+                    <div class="stock-name">팔란티어</div>
+                </a>
+                <a href="news.html?stock=iren&name=아이렌" class="stock-card iren" id="card-iren">
+                    <div class="stock-code">IREN</div>
+                    <div class="stock-name">아이렌</div>
+                </a>
+                <a href="news.html?stock=ionq&name=아이온큐" class="stock-card ionq" id="card-ionq">
+                    <div class="stock-code">IONQ</div>
+                    <div class="stock-name">아이온큐</div>
+                </a>
+                <a href="news.html?stock=biomarin&name=비트마인" class="stock-card bmnr" id="card-biomarin">
+                    <div class="stock-code">BMNR</div>
+                    <div class="stock-name">비트마인</div>
+                </a>
+            </div>
+
+
+
+            <div class="footer">💡 Yahoo Finance 실시간 수집 · Claude AI 분석</div>
+        </div>
+    </div>
+    </div>
+
+    <script>
+        const stockInfo = {
+            'palantir': { name: '팔란티어', ticker: 'PLTR', badgeClass: 'badge-pltr' },
+            'iren':     { name: '아이렌',   ticker: 'IREN', badgeClass: 'badge-iren' },
+            'ionq':     { name: '아이온큐', ticker: 'IONQ', badgeClass: 'badge-ionq' },
+            'biomarin': { name: '비트마인', ticker: 'BMNR', badgeClass: 'badge-bmnr' }
+        };
+
+        // 방문자 카운트
+        async function trackVisitor() {
+            try {
+                const res = await fetch('/api/visitors', { method: 'POST' });
+                const data = await res.json();
+                if (data.success) {
+                    document.getElementById('todayCount').textContent = data.today.toLocaleString();
+                    document.getElementById('totalCount').textContent = data.total.toLocaleString();
+                }
+            } catch (e) {}
+        }
+
+        // 날짜 포맷
+        function formatDate(str) {
+            if (!str) return '';
+            const m = str.match(/(\d{4})\.\s*(\d{2})\.\s*(\d{2})/);
+            if (m) return `${m[2]}/${m[3]}`;
+            const m2 = str.match(/(\d{4})-(\d{2})-(\d{2})/);
+            if (m2) return `${m2[2]}/${m2[3]}`;
+            return str.substring(0, 5);
+        }
+function switchTab(tab) {
+            document.querySelector('.tab-btn.news').classList.toggle('active', tab === 'news');
+            document.querySelector('.tab-btn.sec').classList.toggle('active', tab === 'sec');
+            document.querySelector('.tab-btn.earnings').classList.toggle('active', tab === 'earnings');
+
+            const names = { palantir:'팔란티어', iren:'아이렌', ionq:'아이온큐', biomarin:'비트마인' };
+            document.querySelectorAll('.stock-card').forEach(card => {
+                const stock = card.id.replace('card-', '');
+                if (tab === 'news') {
+                    card.href = `news.html?stock=${stock}&name=${names[stock]}`;
+                    card.classList.remove('sec-mode', 'earnings-mode');
+                } else if (tab === 'sec') {
+                    card.href = `sec.html?stock=${stock}&name=${names[stock]}`;
+                    card.classList.remove('earnings-mode');
+                    card.classList.add('sec-mode');
+                } else {
+                    card.href = `earnings.html?stock=${stock}&name=${names[stock]}`;
+                    card.classList.remove('sec-mode');
+                    card.classList.add('earnings-mode');
+                }
+            });
+        }
+
+        trackVisitor();
+    </script>
+</body>
+</html>
