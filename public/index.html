@@ -276,6 +276,15 @@
         }
         .feed-date { font-size: 11px; color: #bbb; margin-top: 2px; }
         .feed-arrow { color: #ccc; font-size: 18px; font-weight: 300; }
+        .feed-section-label {
+            padding: 8px 14px;
+            background: #f4f6f8;
+            font-size: 12px;
+            font-weight: 700;
+            color: #555;
+            border-top: 1px solid #eee;
+            border-bottom: 1px solid #eee;
+        }
         .feed-empty { text-align: center; color: #aaa; padding: 28px 16px; font-size: 13px; line-height: 1.7; }
 
         /* ── 모바일 반응형 ── */
@@ -538,26 +547,37 @@ function switchTab(tab) {
                 const res = await fetch('/api/feed');
                 const data = await res.json();
 
+                const EMPTY = '<div class="feed-empty">📌 종목 카드를 한 번씩 클릭하면<br>최신 정보가 여기에 표시됩니다.</div>';
                 if (!data.success || !data.feed || data.feed.length === 0) {
-                    feedList.innerHTML = '<div class="feed-empty">📌 종목 카드를 한 번씩 클릭하면<br>최신 정보가 여기에 표시됩니다.</div>';
+                    feedList.innerHTML = EMPTY;
                     return;
                 }
 
-                const typeLabel = { news: '📰 뉴스', sec: '📋 SEC', earnings: '📊 실적' };
-                const typeBadge = { news: 'badge-news', sec: 'badge-sec', earnings: 'badge-earnings' };
+                const sections = [
+                    { type: 'news',     label: '📰 최신 뉴스' },
+                    { type: 'sec',      label: '📋 SEC 공시' },
+                    { type: 'earnings', label: '📊 실적 발표' },
+                ];
                 const tickerBadge = { PLTR: 'badge-pltr', IREN: 'badge-iren', IONQ: 'badge-ionq', BMNR: 'badge-bmnr' };
 
-                feedList.innerHTML = data.feed.map(item => `
-                    <a href="${item.url}" class="feed-item">
-                        <span class="feed-badge ${typeBadge[item.type]}">${typeLabel[item.type]}</span>
-                        <span class="feed-badge ${tickerBadge[item.ticker]}">${item.ticker}</span>
-                        <div class="feed-content">
-                            <div class="feed-title">${item.title}</div>
-                            <div class="feed-date">${item.date}</div>
-                        </div>
-                        <span class="feed-arrow">›</span>
-                    </a>
-                `).join('');
+                let html = '';
+                sections.forEach(({ type, label }) => {
+                    const items = data.feed.filter(i => i.type === type);
+                    if (!items.length) return;
+                    html += `<div class="feed-section-label">${label}</div>`;
+                    html += items.map(item => `
+                        <a href="${item.url}" class="feed-item">
+                            <span class="feed-badge ${tickerBadge[item.ticker]}">${item.ticker}</span>
+                            <div class="feed-content">
+                                <div class="feed-title">${item.title}</div>
+                                <div class="feed-date">${item.date}</div>
+                            </div>
+                            <span class="feed-arrow">›</span>
+                        </a>
+                    `).join('');
+                });
+
+                feedList.innerHTML = html || EMPTY;
             } catch {
                 feedList.innerHTML = '<div class="feed-empty">📌 종목 카드를 한 번씩 클릭하면<br>최신 정보가 여기에 표시됩니다.</div>';
             }
