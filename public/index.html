@@ -175,6 +175,8 @@
             background: white;
             border: 2px solid transparent;
             box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+            min-width: 0;
+            overflow: hidden;
         }
         .stock-card.pltr { border-color: #1E3A6B; }
         .stock-card.pltr:hover { transform: translateY(-6px); box-shadow: 0 10px 28px rgba(30,58,107,0.2); }
@@ -217,8 +219,10 @@
             justify-content: space-between;
             align-items: flex-start;
             margin-bottom: 7px;
+            min-width: 0;
         }
-        .sc-price-wrap { text-align: right; }
+        .sc-top > div:first-child { min-width: 0; overflow: hidden; }
+        .sc-price-wrap { text-align: right; flex-shrink: 0; margin-left: 6px; }
         .sc-price {
             font-size: 16px;
             font-weight: 700;
@@ -253,6 +257,8 @@
             background: #f8f9fa;
             border-radius: 5px;
             padding: 5px 7px;
+            min-width: 0;
+            overflow: hidden;
         }
         .sc-data-label {
             font-size: 9px;
@@ -260,12 +266,15 @@
             font-weight: 600;
             margin-bottom: 2px;
             white-space: nowrap;
+            overflow: hidden;
         }
         .sc-data-val {
             font-size: 12px;
             font-weight: 700;
             color: #2c3e50;
             white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         .sc-dday-val { color: #3498db; }
         .stock-card.sec-mode .sc-data-cell,
