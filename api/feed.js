@@ -20,7 +20,9 @@ function extractKoreanTitle(analysis, fallback) {
   if (!analysis) return fallback;
   const match = analysis.match(/\[한글 번역\][\r\n]+([\s\S]+?)(?:\n\n|\[|$)/);
   if (!match) return fallback;
-  const first = match[1].trim().split('\n')[0].trim();
+  let first = match[1].trim().split('\n')[0].trim();
+  // "제목:", "**제목:**" 등 접두사 제거
+  first = first.replace(/^\*{0,2}제목\s*:\s*\*{0,2}\s*/i, '').trim();
   return first || fallback;
 }
 
