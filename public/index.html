@@ -1,4 +1,4 @@
-<!-- v5 -->
+<!-- v6 -->
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -7,16 +7,13 @@
     <title>실시간 미국주식 | 투자의정석</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
             background: #EDE0C4;
             min-height: 100vh;
             padding: 40px 20px;
         }
-
         .container { max-width: 1000px; margin: 0 auto; }
-
         .app-wrap {
             background: #F5EDD8;
             border-radius: 16px;
@@ -24,96 +21,21 @@
             box-shadow: 0 8px 32px rgba(0,0,0,0.1);
         }
 
-        /* ── 히어로 헤더 ── */
-        .hero {
-            position: relative;
-            background: #F0E4C4;
-            padding: 28px 28px 24px;
-            overflow: hidden;
-        }
-
-        .hero-bg {
-            position: absolute;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            opacity: 0.18;
-        }
-
-        .hero-overlay {
-            position: absolute; inset: 0;
-            background: linear-gradient(to bottom, rgba(240,228,196,0) 50%, rgba(245,237,216,1) 100%);
-        }
-
-        .hero-content {
-            position: relative; z-index: 2;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 16px;
-        }
-
+        /* ── 히어로 ── */
+        .hero { position: relative; background: #F0E4C4; padding: 28px 28px 24px; overflow: hidden; }
+        .hero-bg { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0.18; }
+        .hero-overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(240,228,196,0) 50%, rgba(245,237,216,1) 100%); }
+        .hero-content { position: relative; z-index: 2; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
         .hero-spacer { min-width: 72px; }
         .hero-center { flex: 1; text-align: center; }
-        .hero-right {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 6px;
-            min-width: 72px;
-        }
-
-        .app-title {
-            font-size: 28px;
-            font-weight: 700;
-            color: #1E3A6B;
-            letter-spacing: -0.5px;
-            margin-bottom: 5px;
-        }
-
-        .app-subtitle {
-            font-size: 13px;
-            color: #7A6A4F;
-            margin-bottom: 14px;
-        }
-
-        /* 유튜브 버튼 */
-        .yt-btn {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 6px;
-            text-decoration: none;
-        }
-        .yt-icon-wrap {
-            width: 52px; height: 52px;
-            background: #FF0000;
-            border-radius: 14px;
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 4px 14px rgba(255,0,0,0.28);
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .yt-icon-wrap:hover {
-            transform: scale(1.08);
-            box-shadow: 0 6px 18px rgba(255,0,0,0.35);
-        }
-        .yt-label {
-            font-size: 10px;
-            font-weight: 700;
-            color: #1E3A6B;
-            text-align: center;
-        }
-
-        /* 방문자 통계 */
-        .visitor-bar {
-            display: inline-flex;
-            gap: 18px;
-            background: rgba(255,255,255,0.85);
-            padding: 8px 20px;
-            border-radius: 28px;
-            font-size: 12px;
-            border: 1px solid rgba(30,58,107,0.1);
-        }
+        .hero-right { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 72px; }
+        .app-title { font-size: 28px; font-weight: 700; color: #1E3A6B; letter-spacing: -0.5px; margin-bottom: 5px; }
+        .app-subtitle { font-size: 13px; color: #7A6A4F; margin-bottom: 14px; }
+        .yt-btn { display: flex; flex-direction: column; align-items: center; gap: 6px; text-decoration: none; }
+        .yt-icon-wrap { width: 52px; height: 52px; background: #FF0000; border-radius: 14px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 14px rgba(255,0,0,0.28); transition: transform 0.2s, box-shadow 0.2s; }
+        .yt-icon-wrap:hover { transform: scale(1.08); box-shadow: 0 6px 18px rgba(255,0,0,0.35); }
+        .yt-label { font-size: 10px; font-weight: 700; color: #1E3A6B; text-align: center; }
+        .visitor-bar { display: inline-flex; gap: 18px; background: rgba(255,255,255,0.85); padding: 8px 20px; border-radius: 28px; font-size: 12px; border: 1px solid rgba(30,58,107,0.1); }
         .v-item { display: flex; align-items: center; gap: 5px; color: #7A6A4F; }
         .v-num { font-weight: 700; color: #1E3A6B; font-size: 14px; }
         .v-div { width: 1px; background: #D8C9A8; margin: 2px 0; }
@@ -121,294 +43,166 @@
         /* ── 바디 ── */
         .body-wrap { padding: 20px 24px 28px; }
 
-        /* 탭 */
-        .tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
-        .tab-btn {
-            padding: 11px 36px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        .tab-btn.news {
-            background: #1E3A6B;
-            color: white;
-            border: 2px solid #1E3A6B;
-            box-shadow: 0 4px 12px rgba(30,58,107,0.25);
-        }
-        .tab-btn.news:not(.active) {
-            background: white;
-            color: #1E3A6B;
-            box-shadow: none;
-        }
-        .tab-btn.sec {
-            background: transparent;
-            color: #1E3A6B;
-            border: 2px solid #1E3A6B;
-        }
-        .tab-btn.sec.active {
-            background: #1E3A6B;
-            color: white;
-            box-shadow: 0 4px 12px rgba(30,58,107,0.25);
-        }
-        .tab-btn.earnings { background: transparent; color: #e67e22; border: 2px solid #e67e22; }
-        .tab-btn.earnings.active { background: #e67e22; color: white; box-shadow: 0 4px 12px rgba(230,126,34,0.25); }
-
-        /* 종목 카드 */
-        .stocks-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 16px;
-            margin-bottom: 24px;
-        }
-
+        /* ── 종목 카드 ── */
+        .stocks-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 16px; }
         .stock-card {
-            padding: 16px;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: flex;
-            flex-direction: column;
-            align-items: stretch;
-            background: white;
-            border: 2px solid transparent;
+            padding: 16px; border-radius: 12px; cursor: pointer; transition: all 0.3s ease;
+            display: flex; flex-direction: column; align-items: stretch;
+            background: white; border: 2px solid transparent;
             box-shadow: 0 2px 10px rgba(0,0,0,0.06);
-            min-width: 0;
-            overflow: hidden;
+            min-width: 0; overflow: hidden; user-select: none;
         }
         .stock-card.pltr { border-color: #1E3A6B; }
-        .stock-card.pltr:hover { transform: translateY(-6px); box-shadow: 0 10px 28px rgba(30,58,107,0.2); }
+        .stock-card.pltr:hover, .stock-card.pltr.selected { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(30,58,107,0.22); background: #EEF2FA; }
         .stock-card.iren { border-color: #E8B84B; }
-        .stock-card.iren:hover { transform: translateY(-6px); box-shadow: 0 10px 28px rgba(232,184,75,0.25); }
+        .stock-card.iren:hover, .stock-card.iren.selected { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(232,184,75,0.28); background: #FEF9E7; }
         .stock-card.ionq { border-color: #5B7FA6; }
-        .stock-card.ionq:hover { transform: translateY(-6px); box-shadow: 0 10px 28px rgba(91,127,166,0.25); }
+        .stock-card.ionq:hover, .stock-card.ionq.selected { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(91,127,166,0.28); background: #EBF5FB; }
         .stock-card.bmnr { border-color: #7BAE85; }
-        .stock-card.bmnr:hover { transform: translateY(-6px); box-shadow: 0 10px 28px rgba(123,174,133,0.25); }
+        .stock-card.bmnr:hover, .stock-card.bmnr.selected { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(123,174,133,0.28); background: #EAFAF1; }
 
-        .stock-card.sec-mode { background: #E8EEF2; border-color: #B0BEC5 !important; }
-        .stock-card.sec-mode:hover { background: #CFD8DC; box-shadow: 0 10px 28px rgba(96,125,139,0.25) !important; }
-        .stock-card.earnings-mode { background: #FEF9F0; border-color: #e67e22 !important; }
-        .stock-card.earnings-mode .stock-code { color: #e67e22 !important; }
-        .stock-card.earnings-mode .stock-name { color: #c0392b !important; }
-        .stock-card.earnings-mode:hover { background: #FDEBD0; box-shadow: 0 10px 28px rgba(230,126,34,0.25) !important; }
-
-        .stock-code {
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 2px;
-            margin-bottom: 3px;
-        }
+        .stock-code { font-size: 11px; font-weight: 700; letter-spacing: 2px; margin-bottom: 3px; }
         .stock-card.pltr .stock-code { color: #1E3A6B; }
         .stock-card.iren .stock-code { color: #B8891A; }
         .stock-card.ionq .stock-code { color: #3D6080; }
         .stock-card.bmnr .stock-code { color: #4A7A55; }
-        .stock-card.sec-mode .stock-code { color: #37474F; }
+        .stock-name { font-size: 15px; font-weight: 700; color: #1E3A6B; }
 
-        .stock-name {
-            font-size: 15px;
-            font-weight: 700;
-            color: #1E3A6B;
-        }
-        .stock-card.sec-mode .stock-name { color: #37474F; }
-
-        /* ── 종목카드 내부 요소 ── */
-        .sc-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 7px;
-            min-width: 0;
-        }
+        .sc-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 7px; min-width: 0; }
         .sc-top > div:first-child { min-width: 0; overflow: hidden; }
         .sc-price-wrap { text-align: right; flex-shrink: 0; margin-left: 6px; }
-        .sc-price {
-            font-size: 16px;
-            font-weight: 700;
-            color: #2c3e50;
-            line-height: 1.2;
-        }
-        .sc-change {
-            font-size: 11px;
-            font-weight: 700;
-            color: #95a5a6;
-        }
+        .sc-price { font-size: 16px; font-weight: 700; color: #2c3e50; line-height: 1.2; }
+        .sc-change { font-size: 11px; font-weight: 700; color: #95a5a6; }
         .sc-change.up { color: #27ae60; }
         .sc-change.down { color: #e74c3c; }
-        .sc-desc {
-            font-size: 10px;
-            color: #7A6A4F;
-            line-height: 1.4;
-            margin-bottom: 9px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            min-height: 14px;
-        }
-        .sc-data-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 5px;
-            border-top: 1px solid #f2f2f2;
-            padding-top: 8px;
-        }
-        .sc-data-cell {
-            background: #f8f9fa;
-            border-radius: 5px;
-            padding: 5px 7px;
-            min-width: 0;
-            overflow: hidden;
-        }
-        .sc-data-label {
-            font-size: 9px;
-            color: #95a5a6;
-            font-weight: 600;
-            margin-bottom: 2px;
-            white-space: nowrap;
-            overflow: hidden;
-        }
-        .sc-data-val {
-            font-size: 12px;
-            font-weight: 700;
-            color: #2c3e50;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
+        .sc-desc { font-size: 10px; color: #7A6A4F; margin-bottom: 9px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-height: 14px; }
+        .sc-data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; border-top: 1px solid #f2f2f2; padding-top: 8px; }
+        .sc-data-cell { background: #f8f9fa; border-radius: 5px; padding: 5px 7px; min-width: 0; overflow: hidden; }
+        .sc-data-label { font-size: 9px; color: #95a5a6; font-weight: 600; margin-bottom: 2px; white-space: nowrap; overflow: hidden; }
+        .sc-data-val { font-size: 12px; font-weight: 700; color: #2c3e50; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .sc-dday-val { color: #3498db; }
-        .stock-card.sec-mode .sc-data-cell,
-        .stock-card.earnings-mode .sc-data-cell { background: rgba(255,255,255,0.7); }
-        .stock-card.sec-mode .sc-data-grid { border-top-color: #c8d4d9; }
-        .stock-card.earnings-mode .sc-data-grid { border-top-color: #f0dcc0; }
 
-        .footer {
-            text-align: center;
-            color: #B0A080;
-            font-size: 12px;
-            margin-top: 8px;
-        }
-
-        /* ── 정보 카드 (뉴스·SEC·실적) ── */
-        .info-card {
+        /* ── 상세 패널 ── */
+        .detail-panel {
+            display: none;
             background: white;
             border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
             margin-bottom: 16px;
+            animation: slideDown 0.25s ease;
+            --accent: #1E3A6B;
         }
-        .info-card-header {
-            padding: 12px 16px;
-            font-size: 14px;
-            font-weight: 700;
-            color: white;
-        }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .detail-pltr { --accent: #1E3A6B; }
+        .detail-iren { --accent: #B8891A; }
+        .detail-ionq { --accent: #3D6080; }
+        .detail-bmnr { --accent: #4A7A55; }
+
+        .detail-header { display: flex; justify-content: space-between; align-items: center; padding: 14px 18px 12px; border-bottom: 1px solid #f2f2f2; border-top: 4px solid var(--accent); }
+        .detail-company { display: flex; align-items: center; gap: 10px; }
+        .detail-ticker { font-size: 12px; font-weight: 700; color: var(--accent); letter-spacing: 1.5px; }
+        .detail-name { font-size: 18px; font-weight: 700; color: #1E3A6B; }
+        .detail-close { background: none; border: none; font-size: 18px; color: #aaa; cursor: pointer; padding: 4px 8px; border-radius: 6px; transition: 0.2s; line-height: 1; }
+        .detail-close:hover { background: #f2f2f2; color: #555; }
+
+        .detail-tabs { display: flex; padding: 12px 18px 0; border-bottom: 2px solid #f2f2f2; }
+        .detail-tab { padding: 9px 20px; border: none; background: none; font-size: 13px; font-weight: 600; color: #95a5a6; cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px; transition: 0.2s; white-space: nowrap; }
+        .detail-tab:hover { color: var(--accent); }
+        .detail-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+        .detail-update-info { text-align: center; color: #aaa; font-size: 11px; padding: 7px 18px 0; min-height: 22px; }
+        .detail-content { padding: 14px 18px 20px; min-height: 120px; }
+
+        .detail-loading { text-align: center; padding: 40px 20px; color: var(--accent); font-size: 14px; font-weight: 500; }
+        .detail-spinner { width: 32px; height: 32px; border: 3px solid #ecf0f1; border-top-color: var(--accent); border-radius: 50%; animation: spin 0.9s linear infinite; margin: 0 auto 12px; }
+        .detail-empty { text-align: center; color: #aaa; padding: 40px 20px; font-size: 14px; }
+
+        /* 상세 패널 콘텐츠 아이템 */
+        .d-items { display: flex; flex-direction: column; gap: 18px; }
+        .d-news-item { border-left: 4px solid #3498db; padding: 16px; background: #f8f9fa; border-radius: 8px; }
+        .d-sec-item { border-left: 4px solid var(--accent); padding: 16px; background: #f8f9fa; border-radius: 8px; }
+        .d-earnings-item { border-left: 4px solid #e67e22; padding: 16px; background: #f8f9fa; border-radius: 8px; }
+        .d-earnings-item.future { border-left-color: #3498db; background: #EBF5FB; }
+
+        .d-date { font-size: 12px; font-weight: 700; color: #e74c3c; margin-bottom: 8px; }
+        .d-sec-date { font-size: 12px; font-weight: 700; color: var(--accent); margin-bottom: 8px; }
+        .d-news-title { font-size: 16px; font-weight: 700; color: #2c3e50; margin-bottom: 6px; line-height: 1.5; }
+        .d-news-source { font-size: 11px; color: #95a5a6; margin-bottom: 10px; }
+
+        .d-form-row { margin-bottom: 12px; }
+        .d-form-badge { display: inline-block; background: var(--accent); color: white; padding: 3px 10px; border-radius: 4px; font-size: 12px; font-weight: 700; }
+        .d-form-desc { display: inline; font-size: 13px; color: #546E7A; font-weight: 600; margin-left: 8px; }
+
+        .d-badge-row { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+        .d-badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; color: white; }
+        .d-badge-future { background: #3498db; }
+        .d-badge-beat   { background: #27ae60; }
+        .d-badge-miss   { background: #e74c3c; }
+        .d-badge-meet   { background: #95a5a6; }
+        .d-earn-date { font-size: 12px; font-weight: 700; color: #7f8c8d; }
+        .d-earn-hour { font-size: 11px; color: #95a5a6; background: #ecf0f1; padding: 2px 7px; border-radius: 4px; }
+
+        .d-eps-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 10px 0; }
+        .d-eps-box { background: white; border-radius: 6px; padding: 10px; text-align: center; border: 1px solid #ecf0f1; }
+        .d-eps-label { font-size: 10px; color: #95a5a6; margin-bottom: 4px; font-weight: 600; }
+        .d-eps-val { font-size: 18px; font-weight: 700; color: #2c3e50; }
+        .d-eps-val.beat { color: #27ae60; }
+        .d-eps-val.miss { color: #e74c3c; }
+        .d-eps-sub { font-size: 9px; color: #bbb; margin-top: 2px; }
+
+        .d-analysis-box { background: white; border-left: 3px solid var(--accent); padding: 12px; border-radius: 6px; margin: 10px 0; font-size: 13px; line-height: 1.7; color: #444; }
+        .d-section-title { font-weight: 700; color: var(--accent); margin-top: 8px; margin-bottom: 4px; }
+        .d-news-item .d-analysis-box { border-left-color: #9b59b6; }
+        .d-news-item .d-section-title { color: #9b59b6; }
+        .d-earnings-item.future .d-analysis-box { border-left-color: #3498db; }
+        .d-earnings-item.future .d-section-title { color: #3498db; }
+
+        .d-link { display: inline-block; margin-top: 10px; padding: 8px 14px; background: var(--accent); color: white; text-decoration: none; border-radius: 6px; font-size: 12px; font-weight: 600; transition: 0.2s; }
+        .d-link:hover { opacity: 0.85; transform: translateY(-1px); }
+        .d-news-item .d-link { background: #3498db; }
+
+        /* ── 정보 카드 ── */
+        .info-card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.06); margin-bottom: 16px; }
+        .info-card-header { padding: 12px 16px; font-size: 14px; font-weight: 700; color: white; }
         .info-card-header.news     { background: #1E3A6B; }
         .info-card-header.sec      { background: #607D8B; }
         .info-card-header.earnings { background: #e67e22; }
-        .feed-item {
-            display: flex;
-            align-items: center;
-            padding: 11px 14px;
-            border-bottom: 1px solid #f2f2f2;
-            text-decoration: none;
-            gap: 8px;
-            transition: background 0.15s;
-        }
+        .feed-item { display: flex; align-items: center; padding: 11px 14px; border-bottom: 1px solid #f2f2f2; text-decoration: none; gap: 8px; transition: background 0.15s; }
         .feed-item:last-child { border-bottom: none; }
         .feed-item:hover { background: #f8f9fa; }
-        .feed-badge {
-            font-size: 10px;
-            font-weight: 700;
-            padding: 3px 7px;
-            border-radius: 10px;
-            white-space: nowrap;
-            text-align: center;
-        }
-        .badge-news     { background: #EBF5FB; color: #2980b9; }
-        .badge-sec      { background: #ECEFF1; color: #546E7A; }
-        .badge-earnings { background: #FEF9F0; color: #e67e22; }
+        .feed-badge { font-size: 10px; font-weight: 700; padding: 3px 7px; border-radius: 10px; white-space: nowrap; }
         .badge-pltr { background: #EBF0F8; color: #1E3A6B; }
         .badge-iren { background: #FEF9E7; color: #B8891A; }
         .badge-ionq { background: #EBF5FB; color: #3D6080; }
         .badge-bmnr { background: #EAFAF1; color: #4A7A55; }
         .feed-content { flex: 1; min-width: 0; }
-        .feed-title {
-            font-size: 13px;
-            color: #2c3e50;
-            font-weight: 500;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
+        .feed-title { font-size: 13px; color: #2c3e50; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .feed-date { font-size: 11px; color: #bbb; margin-top: 2px; }
         .feed-arrow { color: #ccc; font-size: 18px; font-weight: 300; }
         .feed-empty { text-align: center; color: #aaa; padding: 28px 16px; font-size: 13px; line-height: 1.7; }
 
-        /* ── 모바일 반응형 ── */
+        .footer { text-align: center; color: #B0A080; font-size: 12px; margin-top: 8px; }
+
+        /* ── 모바일 ── */
         @media (max-width: 768px) {
             body { padding: 0 !important; }
             .app-wrap { border-radius: 0 !important; }
-
             .hero { padding: 14px !important; position: relative !important; }
-
-            .hero-content {
-                flex-direction: column !important;
-                align-items: center !important;
-                gap: 8px !important;
-            }
-
+            .hero-content { flex-direction: column !important; align-items: center !important; gap: 8px !important; }
             .hero-spacer { display: none !important; }
             .hero-center { width: 100% !important; }
-
-            .hero-right {
-                position: absolute !important;
-                top: 14px !important;
-                right: 14px !important;
-                min-width: unset !important;
-                gap: 3px !important;
-            }
+            .hero-right { position: absolute !important; top: 14px !important; right: 14px !important; min-width: unset !important; gap: 3px !important; }
             .yt-icon-wrap { width: 32px !important; height: 32px !important; border-radius: 8px !important; }
             .yt-label { font-size: 8px !important; }
-
-            .app-title {
-                font-size: 20px !important;
-                white-space: nowrap !important;
-                overflow: hidden !important;
-                text-overflow: ellipsis !important;
-            }
-            .app-subtitle {
-                font-size: 11px !important;
-                margin-bottom: 10px !important;
-                white-space: nowrap !important;
-                overflow: hidden !important;
-                text-overflow: ellipsis !important;
-            }
-
+            .app-title { font-size: 20px !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; }
+            .app-subtitle { font-size: 11px !important; margin-bottom: 10px !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; }
             .visitor-bar { padding: 6px 14px !important; gap: 12px !important; font-size: 11px !important; }
             .v-num { font-size: 12px !important; }
-
             .body-wrap { padding: 12px 10px 20px !important; }
-
-            .tabs { gap: 5px !important; margin-bottom: 12px !important; }
-            .tab-btn {
-                padding: 8px 0 !important;
-                font-size: 10px !important;
-                flex: 1 !important;
-                text-align: center !important;
-                white-space: nowrap !important;
-            }
-
-            .stocks-grid {
-                grid-template-columns: repeat(2, 1fr) !important;
-                gap: 8px !important;
-                margin-bottom: 14px !important;
-            }
-            .stock-card {
-                padding: 11px 10px !important;
-                border-radius: 8px !important;
-                border-width: 1.5px !important;
-            }
+            .stocks-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; margin-bottom: 10px !important; }
+            .stock-card { padding: 11px 10px !important; border-radius: 8px !important; border-width: 1.5px !important; }
             .stock-code { font-size: 9px !important; letter-spacing: 1px !important; }
             .stock-name { font-size: 13px !important; }
             .sc-price { font-size: 13px !important; }
@@ -418,342 +212,412 @@
             .sc-data-cell { padding: 4px 5px !important; }
             .sc-data-label { font-size: 8px !important; }
             .sc-data-val { font-size: 11px !important; }
-
+            .detail-panel { border-radius: 8px !important; margin-bottom: 10px !important; }
+            .detail-header { padding: 11px 14px 10px !important; }
+            .detail-name { font-size: 15px !important; }
+            .detail-tabs { padding: 10px 10px 0 !important; }
+            .detail-tab { padding: 8px 12px !important; font-size: 12px !important; }
+            .detail-content { padding: 12px 12px 16px !important; }
+            .d-news-title { font-size: 14px !important; }
+            .d-eps-val { font-size: 15px !important; }
             .info-card { border-radius: 8px !important; margin-bottom: 10px !important; }
             .info-card-header { padding: 9px 12px !important; font-size: 12px !important; }
-
             .feed-item { padding: 9px 10px !important; gap: 6px !important; }
-            .feed-badge { font-size: 8px !important; padding: 2px 5px !important; min-width: 32px !important; }
+            .feed-badge { font-size: 8px !important; padding: 2px 5px !important; }
             .feed-title { font-size: 12px !important; }
             .feed-date { font-size: 10px !important; }
-            .feed-arrow { font-size: 13px !important; }
-
             .footer { font-size: 11px !important; margin-top: 6px !important; }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-    <div class="app-wrap">
+<div class="container">
+<div class="app-wrap">
 
-        <!-- 히어로 헤더 -->
-        <div class="hero">
-            <svg class="hero-bg" viewBox="0 0 700 160" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="65" cy="42" r="24" fill="#E8B84B"/>
-                <text x="65" y="49" text-anchor="middle" font-size="15" fill="#C89A2E" font-weight="bold">₩</text>
-                <circle cx="620" cy="32" r="20" fill="#E8B84B"/>
-                <text x="620" y="39" text-anchor="middle" font-size="13" fill="#C89A2E" font-weight="bold">$</text>
-                <circle cx="565" cy="118" r="15" fill="#E8B84B"/>
-                <text x="565" y="124" text-anchor="middle" font-size="10" fill="#C89A2E" font-weight="bold">₩</text>
-                <rect x="28" y="82" width="74" height="40" rx="5" fill="#E8B84B" opacity="0.7" transform="rotate(-12 65 102)"/>
-                <text x="65" y="107" text-anchor="middle" font-size="11" fill="#C89A2E" transform="rotate(-12 65 102)">₩</text>
-                <rect x="545" y="58" width="84" height="42" rx="5" fill="#E8B84B" opacity="0.6" transform="rotate(8 587 79)"/>
-                <text x="587" y="83" text-anchor="middle" font-size="11" fill="#C89A2E" transform="rotate(8 587 79)">$</text>
-                <polyline points="400,148 445,112 478,126 532,72 580,84" fill="none" stroke="#E8B84B" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
-                <polygon points="578,68 594,82 572,86" fill="#E8B84B"/>
-                <text x="155" y="30" font-size="17" fill="#E8B84B" opacity="0.8">✦</text>
-                <text x="360" y="52" font-size="11" fill="#E8B84B" opacity="0.6">✦</text>
-                <text x="280" y="148" font-size="13" fill="#E8B84B" opacity="0.5">✦</text>
-                <text x="660" y="138" font-size="9" fill="#E8B84B" opacity="0.7">✦</text>
-                <text x="490" y="30" font-size="8" fill="#E8B84B" opacity="0.5">✦</text>
-            </svg>
-            <div class="hero-overlay"></div>
-
-            <div class="hero-content">
-                <div class="hero-spacer"></div>
-
-                <div class="hero-center">
-                    <div class="app-title">📊 실시간 미국주식</div>
-                    <div class="app-subtitle">종목을 선택하면 최신 정보를 확인할 수 있습니다</div>
-                    <div class="visitor-bar">
-                        <div class="v-item">
-                            <span>👤</span><span>오늘</span>
-                            <span class="v-num" id="todayCount">-</span><span>명</span>
-                        </div>
-                        <div class="v-div"></div>
-                        <div class="v-item">
-                            <span>📈</span><span>누적</span>
-                            <span class="v-num" id="totalCount">-</span><span>명</span>
-                        </div>
-                    </div>
+    <div class="hero">
+        <svg class="hero-bg" viewBox="0 0 700 160" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="65" cy="42" r="24" fill="#E8B84B"/>
+            <text x="65" y="49" text-anchor="middle" font-size="15" fill="#C89A2E" font-weight="bold">₩</text>
+            <circle cx="620" cy="32" r="20" fill="#E8B84B"/>
+            <text x="620" y="39" text-anchor="middle" font-size="13" fill="#C89A2E" font-weight="bold">$</text>
+            <circle cx="565" cy="118" r="15" fill="#E8B84B"/>
+            <text x="565" y="124" text-anchor="middle" font-size="10" fill="#C89A2E" font-weight="bold">₩</text>
+            <rect x="28" y="82" width="74" height="40" rx="5" fill="#E8B84B" opacity="0.7" transform="rotate(-12 65 102)"/>
+            <text x="65" y="107" text-anchor="middle" font-size="11" fill="#C89A2E" transform="rotate(-12 65 102)">₩</text>
+            <rect x="545" y="58" width="84" height="42" rx="5" fill="#E8B84B" opacity="0.6" transform="rotate(8 587 79)"/>
+            <text x="587" y="83" text-anchor="middle" font-size="11" fill="#C89A2E" transform="rotate(8 587 79)">$</text>
+            <polyline points="400,148 445,112 478,126 532,72 580,84" fill="none" stroke="#E8B84B" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <polygon points="578,68 594,82 572,86" fill="#E8B84B"/>
+            <text x="155" y="30" font-size="17" fill="#E8B84B" opacity="0.8">✦</text>
+            <text x="360" y="52" font-size="11" fill="#E8B84B" opacity="0.6">✦</text>
+            <text x="280" y="148" font-size="13" fill="#E8B84B" opacity="0.5">✦</text>
+            <text x="660" y="138" font-size="9" fill="#E8B84B" opacity="0.7">✦</text>
+            <text x="490" y="30" font-size="8" fill="#E8B84B" opacity="0.5">✦</text>
+        </svg>
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <div class="hero-spacer"></div>
+            <div class="hero-center">
+                <div class="app-title">📊 실시간 미국주식</div>
+                <div class="app-subtitle">종목을 선택하면 최신 정보를 확인할 수 있습니다</div>
+                <div class="visitor-bar">
+                    <div class="v-item"><span>👤</span><span>오늘</span><span class="v-num" id="todayCount">-</span><span>명</span></div>
+                    <div class="v-div"></div>
+                    <div class="v-item"><span>📈</span><span>누적</span><span class="v-num" id="totalCount">-</span><span>명</span></div>
                 </div>
+            </div>
+            <div class="hero-right">
+                <a class="yt-btn" href="https://www.youtube.com/@투자의정석-z2o" target="_blank">
+                    <div class="yt-icon-wrap">
+                        <svg width="28" height="20" viewBox="0 0 26 18" fill="none">
+                            <path d="M25.4 2.8A3.26 3.26 0 0023.1.5C21.1 0 13 0 13 0S4.9 0 2.9.5A3.26 3.26 0 00.6 2.8C0 4.8 0 9 0 9s0 4.2.6 6.2a3.26 3.26 0 002.3 2.3C4.9 18 13 18 13 18s8.1 0 10.1-.5a3.26 3.26 0 002.3-2.3C26 13.2 26 9 26 9s0-4.2-.6-6.2z" fill="white"/>
+                            <path d="M10.4 12.9l6.7-3.9-6.7-3.9v7.8z" fill="#FF0000"/>
+                        </svg>
+                    </div>
+                    <div class="yt-label">투자의정석</div>
+                </a>
+            </div>
+        </div>
+    </div>
 
-                <div class="hero-right">
-                    <a class="yt-btn" href="https://www.youtube.com/@투자의정석-z2o" target="_blank">
-                        <div class="yt-icon-wrap">
-                            <svg width="28" height="20" viewBox="0 0 26 18" fill="none">
-                                <path d="M25.4 2.8A3.26 3.26 0 0023.1.5C21.1 0 13 0 13 0S4.9 0 2.9.5A3.26 3.26 0 00.6 2.8C0 4.8 0 9 0 9s0 4.2.6 6.2a3.26 3.26 0 002.3 2.3C4.9 18 13 18 13 18s8.1 0 10.1-.5a3.26 3.26 0 002.3-2.3C26 13.2 26 9 26 9s0-4.2-.6-6.2z" fill="white"/>
-                                <path d="M10.4 12.9l6.7-3.9-6.7-3.9v7.8z" fill="#FF0000"/>
-                            </svg>
-                        </div>
-                        <div class="yt-label">투자의정석</div>
-                    </a>
+    <div class="body-wrap">
+
+        <div class="stocks-grid">
+            <div class="stock-card pltr" id="card-palantir" onclick="openDetail('palantir')">
+                <div class="sc-top">
+                    <div><div class="stock-code">PLTR</div><div class="stock-name">팔란티어</div></div>
+                    <div class="sc-price-wrap"><div class="sc-price" id="price-palantir">-</div><div class="sc-change" id="change-palantir">-</div></div>
+                </div>
+                <div class="sc-desc" id="desc-palantir"></div>
+                <div class="sc-data-grid">
+                    <div class="sc-data-cell"><div class="sc-data-label">52주 고가</div><div class="sc-data-val" id="w52h-palantir">-</div></div>
+                    <div class="sc-data-cell"><div class="sc-data-label">52주 저가</div><div class="sc-data-val" id="w52l-palantir">-</div></div>
+                    <div class="sc-data-cell"><div class="sc-data-label">목표주가</div><div class="sc-data-val" id="target-palantir">-</div></div>
+                    <div class="sc-data-cell"><div class="sc-data-label">공매도</div><div class="sc-data-val" id="short-palantir">-</div></div>
+                    <div class="sc-data-cell"><div class="sc-data-label">기관비중</div><div class="sc-data-val" id="inst-palantir">-</div></div>
+                    <div class="sc-data-cell"><div class="sc-data-label">실적 D-day</div><div class="sc-data-val sc-dday-val" id="dday-palantir">-</div></div>
+                </div>
+            </div>
+            <div class="stock-card iren" id="card-iren" onclick="openDetail('iren')">
+                <div class="sc-top">
+                    <div><div class="stock-code">IREN</div><div class="stock-name">아이렌</div></div>
+                    <div class="sc-price-wrap"><div class="sc-price" id="price-iren">-</div><div class="sc-change" id="change-iren">-</div></div>
+                </div>
+                <div class="sc-desc" id="desc-iren"></div>
+                <div class="sc-data-grid">
+                    <div class="sc-data-cell"><div class="sc-data-label">52주 고가</div><div class="sc-data-val" id="w52h-iren">-</div></div>
+                    <div class="sc-data-cell"><div class="sc-data-label">52주 저가</div><div class="sc-data-val" id="w52l-iren">-</div></div>
+                    <div class="sc-data-cell"><div class="sc-data-label">목표주가</div><div class="sc-data-val" id="target-iren">-</div></div>
+                    <div class="sc-data-cell"><div class="sc-data-label">공매도</div><div class="sc-data-val" id="short-iren">-</div></div>
+                    <div class="sc-data-cell"><div class="sc-data-label">기관비중</div><div class="sc-data-val" id="inst-iren">-</div></div>
+                    <div class="sc-data-cell"><div class="sc-data-label">실적 D-day</div><div class="sc-data-val sc-dday-val" id="dday-iren">-</div></div>
+                </div>
+            </div>
+            <div class="stock-card ionq" id="card-ionq" onclick="openDetail('ionq')">
+                <div class="sc-top">
+                    <div><div class="stock-code">IONQ</div><div class="stock-name">아이온큐</div></div>
+                    <div class="sc-price-wrap"><div class="sc-price" id="price-ionq">-</div><div class="sc-change" id="change-ionq">-</div></div>
+                </div>
+                <div class="sc-desc" id="desc-ionq"></div>
+                <div class="sc-data-grid">
+                    <div class="sc-data-cell"><div class="sc-data-label">52주 고가</div><div class="sc-data-val" id="w52h-ionq">-</div></div>
+                    <div class="sc-data-cell"><div class="sc-data-label">52주 저가</div><div class="sc-data-val" id="w52l-ionq">-</div></div>
+                    <div class="sc-data-cell"><div class="sc-data-label">목표주가</div><div class="sc-data-val" id="target-ionq">-</div></div>
+                    <div class="sc-data-cell"><div class="sc-data-label">공매도</div><div class="sc-data-val" id="short-ionq">-</div></div>
+                    <div class="sc-data-cell"><div class="sc-data-label">기관비중</div><div class="sc-data-val" id="inst-ionq">-</div></div>
+                    <div class="sc-data-cell"><div class="sc-data-label">실적 D-day</div><div class="sc-data-val sc-dday-val" id="dday-ionq">-</div></div>
+                </div>
+            </div>
+            <div class="stock-card bmnr" id="card-biomarin" onclick="openDetail('biomarin')">
+                <div class="sc-top">
+                    <div><div class="stock-code">BMNR</div><div class="stock-name">비트마인</div></div>
+                    <div class="sc-price-wrap"><div class="sc-price" id="price-biomarin">-</div><div class="sc-change" id="change-biomarin">-</div></div>
+                </div>
+                <div class="sc-desc" id="desc-biomarin"></div>
+                <div class="sc-data-grid">
+                    <div class="sc-data-cell"><div class="sc-data-label">52주 고가</div><div class="sc-data-val" id="w52h-biomarin">-</div></div>
+                    <div class="sc-data-cell"><div class="sc-data-label">52주 저가</div><div class="sc-data-val" id="w52l-biomarin">-</div></div>
+                    <div class="sc-data-cell"><div class="sc-data-label">목표주가</div><div class="sc-data-val" id="target-biomarin">-</div></div>
+                    <div class="sc-data-cell"><div class="sc-data-label">공매도</div><div class="sc-data-val" id="short-biomarin">-</div></div>
+                    <div class="sc-data-cell"><div class="sc-data-label">기관비중</div><div class="sc-data-val" id="inst-biomarin">-</div></div>
+                    <div class="sc-data-cell"><div class="sc-data-label">실적 D-day</div><div class="sc-data-val sc-dday-val" id="dday-biomarin">-</div></div>
                 </div>
             </div>
         </div>
 
-        <!-- 바디 -->
-        <div class="body-wrap">
-            <div class="tabs">
-                <button class="tab-btn news active" onclick="switchTab('news')">📰 뉴스</button>
-                <button class="tab-btn sec" onclick="switchTab('sec')">📋 SEC 공시</button>
-                <button class="tab-btn earnings" onclick="switchTab('earnings')">📊 실적발표</button>
+        <!-- 상세 패널 -->
+        <div class="detail-panel" id="detailPanel">
+            <div class="detail-header">
+                <div class="detail-company">
+                    <span class="detail-ticker" id="detailTicker"></span>
+                    <span class="detail-name" id="detailName"></span>
+                </div>
+                <button class="detail-close" onclick="closeDetail()">✕</button>
             </div>
-
-            <div class="stocks-grid">
-                <a href="news.html?stock=palantir&name=팔란티어" class="stock-card pltr" id="card-palantir">
-                    <div class="sc-top">
-                        <div><div class="stock-code">PLTR</div><div class="stock-name">팔란티어</div></div>
-                        <div class="sc-price-wrap">
-                            <div class="sc-price" id="price-palantir">-</div>
-                            <div class="sc-change" id="change-palantir">-</div>
-                        </div>
-                    </div>
-                    <div class="sc-desc" id="desc-palantir"></div>
-                    <div class="sc-data-grid">
-                        <div class="sc-data-cell"><div class="sc-data-label">52주 고가</div><div class="sc-data-val" id="w52h-palantir">-</div></div>
-                        <div class="sc-data-cell"><div class="sc-data-label">52주 저가</div><div class="sc-data-val" id="w52l-palantir">-</div></div>
-                        <div class="sc-data-cell"><div class="sc-data-label">목표주가</div><div class="sc-data-val" id="target-palantir">-</div></div>
-                        <div class="sc-data-cell"><div class="sc-data-label">공매도</div><div class="sc-data-val" id="short-palantir">-</div></div>
-                        <div class="sc-data-cell"><div class="sc-data-label">기관비중</div><div class="sc-data-val" id="inst-palantir">-</div></div>
-                        <div class="sc-data-cell"><div class="sc-data-label">실적 D-day</div><div class="sc-data-val sc-dday-val" id="dday-palantir">-</div></div>
-                    </div>
-                </a>
-                <a href="news.html?stock=iren&name=아이렌" class="stock-card iren" id="card-iren">
-                    <div class="sc-top">
-                        <div><div class="stock-code">IREN</div><div class="stock-name">아이렌</div></div>
-                        <div class="sc-price-wrap">
-                            <div class="sc-price" id="price-iren">-</div>
-                            <div class="sc-change" id="change-iren">-</div>
-                        </div>
-                    </div>
-                    <div class="sc-desc" id="desc-iren"></div>
-                    <div class="sc-data-grid">
-                        <div class="sc-data-cell"><div class="sc-data-label">52주 고가</div><div class="sc-data-val" id="w52h-iren">-</div></div>
-                        <div class="sc-data-cell"><div class="sc-data-label">52주 저가</div><div class="sc-data-val" id="w52l-iren">-</div></div>
-                        <div class="sc-data-cell"><div class="sc-data-label">목표주가</div><div class="sc-data-val" id="target-iren">-</div></div>
-                        <div class="sc-data-cell"><div class="sc-data-label">공매도</div><div class="sc-data-val" id="short-iren">-</div></div>
-                        <div class="sc-data-cell"><div class="sc-data-label">기관비중</div><div class="sc-data-val" id="inst-iren">-</div></div>
-                        <div class="sc-data-cell"><div class="sc-data-label">실적 D-day</div><div class="sc-data-val sc-dday-val" id="dday-iren">-</div></div>
-                    </div>
-                </a>
-                <a href="news.html?stock=ionq&name=아이온큐" class="stock-card ionq" id="card-ionq">
-                    <div class="sc-top">
-                        <div><div class="stock-code">IONQ</div><div class="stock-name">아이온큐</div></div>
-                        <div class="sc-price-wrap">
-                            <div class="sc-price" id="price-ionq">-</div>
-                            <div class="sc-change" id="change-ionq">-</div>
-                        </div>
-                    </div>
-                    <div class="sc-desc" id="desc-ionq"></div>
-                    <div class="sc-data-grid">
-                        <div class="sc-data-cell"><div class="sc-data-label">52주 고가</div><div class="sc-data-val" id="w52h-ionq">-</div></div>
-                        <div class="sc-data-cell"><div class="sc-data-label">52주 저가</div><div class="sc-data-val" id="w52l-ionq">-</div></div>
-                        <div class="sc-data-cell"><div class="sc-data-label">목표주가</div><div class="sc-data-val" id="target-ionq">-</div></div>
-                        <div class="sc-data-cell"><div class="sc-data-label">공매도</div><div class="sc-data-val" id="short-ionq">-</div></div>
-                        <div class="sc-data-cell"><div class="sc-data-label">기관비중</div><div class="sc-data-val" id="inst-ionq">-</div></div>
-                        <div class="sc-data-cell"><div class="sc-data-label">실적 D-day</div><div class="sc-data-val sc-dday-val" id="dday-ionq">-</div></div>
-                    </div>
-                </a>
-                <a href="news.html?stock=biomarin&name=비트마인" class="stock-card bmnr" id="card-biomarin">
-                    <div class="sc-top">
-                        <div><div class="stock-code">BMNR</div><div class="stock-name">비트마인</div></div>
-                        <div class="sc-price-wrap">
-                            <div class="sc-price" id="price-biomarin">-</div>
-                            <div class="sc-change" id="change-biomarin">-</div>
-                        </div>
-                    </div>
-                    <div class="sc-desc" id="desc-biomarin"></div>
-                    <div class="sc-data-grid">
-                        <div class="sc-data-cell"><div class="sc-data-label">52주 고가</div><div class="sc-data-val" id="w52h-biomarin">-</div></div>
-                        <div class="sc-data-cell"><div class="sc-data-label">52주 저가</div><div class="sc-data-val" id="w52l-biomarin">-</div></div>
-                        <div class="sc-data-cell"><div class="sc-data-label">목표주가</div><div class="sc-data-val" id="target-biomarin">-</div></div>
-                        <div class="sc-data-cell"><div class="sc-data-label">공매도</div><div class="sc-data-val" id="short-biomarin">-</div></div>
-                        <div class="sc-data-cell"><div class="sc-data-label">기관비중</div><div class="sc-data-val" id="inst-biomarin">-</div></div>
-                        <div class="sc-data-cell"><div class="sc-data-label">실적 D-day</div><div class="sc-data-val sc-dday-val" id="dday-biomarin">-</div></div>
-                    </div>
-                </a>
+            <div class="detail-tabs">
+                <button class="detail-tab active" id="dtab-news"     onclick="switchDetailTab('news')">📰 뉴스</button>
+                <button class="detail-tab"        id="dtab-sec"      onclick="switchDetailTab('sec')">📋 SEC</button>
+                <button class="detail-tab"        id="dtab-earnings" onclick="switchDetailTab('earnings')">📊 실적</button>
             </div>
-
-
-
-            <!-- 최신 뉴스 카드 -->
-            <div class="info-card">
-                <div class="info-card-header news">📰 최신 뉴스</div>
-                <div id="feed-news"><div class="feed-empty">⏳ 불러오는 중...</div></div>
+            <div class="detail-update-info" id="detailUpdateInfo"></div>
+            <div class="detail-content" id="detailContent">
+                <div class="detail-loading"><div class="detail-spinner"></div>불러오는 중...</div>
             </div>
-
-            <!-- SEC 공시 카드 -->
-            <div class="info-card">
-                <div class="info-card-header sec">📋 SEC 공시</div>
-                <div id="feed-sec"><div class="feed-empty">⏳ 불러오는 중...</div></div>
-            </div>
-
-            <!-- 실적 발표 카드 -->
-            <div class="info-card">
-                <div class="info-card-header earnings">📊 실적 발표</div>
-                <div id="feed-earnings"><div class="feed-empty">⏳ 불러오는 중...</div></div>
-            </div>
-
-            <div class="footer">💡 Yahoo Finance 실시간 수집 · Claude AI 분석</div>
         </div>
+
+        <!-- 통합 피드 카드 -->
+        <div class="info-card">
+            <div class="info-card-header news">📰 최신 뉴스</div>
+            <div id="feed-news"><div class="feed-empty">⏳ 불러오는 중...</div></div>
+        </div>
+        <div class="info-card">
+            <div class="info-card-header sec">📋 SEC 공시</div>
+            <div id="feed-sec"><div class="feed-empty">⏳ 불러오는 중...</div></div>
+        </div>
+        <div class="info-card">
+            <div class="info-card-header earnings">📊 실적 발표</div>
+            <div id="feed-earnings"><div class="feed-empty">⏳ 불러오는 중...</div></div>
+        </div>
+
+        <div class="footer">💡 Yahoo Finance 실시간 수집 · Claude AI 분석</div>
     </div>
-    </div>
+</div>
+</div>
 
-    <script>
-        const stockInfo = {
-            'palantir': { name: '팔란티어', ticker: 'PLTR', badgeClass: 'badge-pltr' },
-            'iren':     { name: '아이렌',   ticker: 'IREN', badgeClass: 'badge-iren' },
-            'ionq':     { name: '아이온큐', ticker: 'IONQ', badgeClass: 'badge-ionq' },
-            'biomarin': { name: '비트마인', ticker: 'BMNR', badgeClass: 'badge-bmnr' }
-        };
+<script>
+    const stockMeta = {
+        palantir: { name: '팔란티어', ticker: 'PLTR', cls: 'detail-pltr' },
+        iren:     { name: '아이렌',   ticker: 'IREN', cls: 'detail-iren' },
+        ionq:     { name: '아이온큐', ticker: 'IONQ', cls: 'detail-ionq' },
+        biomarin: { name: '비트마인', ticker: 'BMNR', cls: 'detail-bmnr' },
+    };
 
-        // 방문자 카운트
-        async function trackVisitor() {
-            try {
-                const alreadyCounted = sessionStorage.getItem('visited');
-                const method = alreadyCounted ? 'GET' : 'POST';
-                const res = await fetch('/api/visitors', { method });
-                const data = await res.json();
-                if (data.success) {
-                    if (!alreadyCounted) sessionStorage.setItem('visited', '1');
-                    document.getElementById('todayCount').textContent = data.today.toLocaleString();
-                    document.getElementById('totalCount').textContent = data.total.toLocaleString();
-                }
-            } catch (e) {}
-        }
+    async function trackVisitor() {
+        try {
+            const alreadyCounted = sessionStorage.getItem('visited');
+            const res = await fetch('/api/visitors', { method: alreadyCounted ? 'GET' : 'POST' });
+            const data = await res.json();
+            if (data.success) {
+                if (!alreadyCounted) sessionStorage.setItem('visited', '1');
+                document.getElementById('todayCount').textContent = data.today.toLocaleString();
+                document.getElementById('totalCount').textContent = data.total.toLocaleString();
+            }
+        } catch (e) {}
+    }
 
-        // 날짜 포맷
-        function formatDate(str) {
-            if (!str) return '';
-            const m = str.match(/(\d{4})\.\s*(\d{2})\.\s*(\d{2})/);
-            if (m) return `${m[2]}/${m[3]}`;
-            const m2 = str.match(/(\d{4})-(\d{2})-(\d{2})/);
-            if (m2) return `${m2[2]}/${m2[3]}`;
-            return str.substring(0, 5);
-        }
-function switchTab(tab) {
-            document.querySelector('.tab-btn.news').classList.toggle('active', tab === 'news');
-            document.querySelector('.tab-btn.sec').classList.toggle('active', tab === 'sec');
-            document.querySelector('.tab-btn.earnings').classList.toggle('active', tab === 'earnings');
+    function getTimeAgo(iso) {
+        const m = Math.floor((Date.now() - new Date(iso)) / 60000);
+        const h = Math.floor(m / 60);
+        if (m < 1) return '방금 전';
+        if (m < 60) return m + '분 전';
+        if (h < 24) return h + '시간 전';
+        return Math.floor(h / 24) + '일 전';
+    }
 
-            const names = { palantir:'팔란티어', iren:'아이렌', ionq:'아이온큐', biomarin:'비트마인' };
-            document.querySelectorAll('.stock-card').forEach(card => {
-                const stock = card.id.replace('card-', '');
-                if (tab === 'news') {
-                    card.href = `news.html?stock=${stock}&name=${names[stock]}`;
-                    card.classList.remove('sec-mode', 'earnings-mode');
-                } else if (tab === 'sec') {
-                    card.href = `sec.html?stock=${stock}&name=${names[stock]}`;
-                    card.classList.remove('earnings-mode');
-                    card.classList.add('sec-mode');
+    function formatDateLong(s) {
+        if (!s) return '';
+        return new Date(s).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+    }
+
+    function fmtEPS(v) { return (v == null) ? '-' : (v >= 0 ? '+$' : '-$') + Math.abs(v).toFixed(2); }
+    function fmtRev(v) {
+        if (!v) return '-';
+        if (v >= 1e9) return '$' + (v / 1e9).toFixed(2) + 'B';
+        if (v >= 1e6) return '$' + (v / 1e6).toFixed(0) + 'M';
+        return '$' + v.toLocaleString();
+    }
+    function fmtAnalysis(t) {
+        return t.replace(/\[([^\]]+)\]/g, '<div class="d-section-title">[$1]</div>').replace(/\n/g, '<br>');
+    }
+
+    // ── 상세 패널 ──
+    let curStock = null, curTab = 'news';
+    const detailCache = {};
+
+    function openDetail(stock) {
+        const panel = document.getElementById('detailPanel');
+        if (curStock === stock && panel.style.display !== 'none') { closeDetail(); return; }
+        if (curStock) document.getElementById('card-' + curStock).classList.remove('selected');
+
+        curStock = stock;
+        const meta = stockMeta[stock];
+        document.getElementById('card-' + stock).classList.add('selected');
+        panel.className = 'detail-panel ' + meta.cls;
+        panel.style.display = 'block';
+        document.getElementById('detailTicker').textContent = meta.ticker;
+        document.getElementById('detailName').textContent = meta.name;
+
+        curTab = 'news';
+        ['news', 'sec', 'earnings'].forEach(t =>
+            document.getElementById('dtab-' + t).classList.toggle('active', t === 'news'));
+
+        setTimeout(() => panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 60);
+        loadDetailContent();
+    }
+
+    function closeDetail() {
+        document.getElementById('detailPanel').style.display = 'none';
+        if (curStock) { document.getElementById('card-' + curStock).classList.remove('selected'); curStock = null; }
+    }
+
+    function switchDetailTab(tab) {
+        if (!curStock) return;
+        curTab = tab;
+        ['news', 'sec', 'earnings'].forEach(t =>
+            document.getElementById('dtab-' + t).classList.toggle('active', t === tab));
+        loadDetailContent();
+    }
+
+    async function loadDetailContent() {
+        const key = curStock + ':' + curTab;
+        const content = document.getElementById('detailContent');
+        const info    = document.getElementById('detailUpdateInfo');
+
+        if (detailCache[key]) { content.innerHTML = detailCache[key].html; info.textContent = detailCache[key].info; return; }
+
+        content.innerHTML = '<div class="detail-loading"><div class="detail-spinner"></div>불러오는 중...</div>';
+        info.textContent = '';
+
+        const stock = curStock, tab = curTab;
+        try {
+            let html = '', infoText = '';
+
+            if (tab === 'news') {
+                const d = await fetch('/api/news?stock=' + stock).then(r => r.json());
+                if (!d.success || !d.news?.length) {
+                    html = '<div class="detail-empty">📭 현재 표시할 뉴스가 없습니다.</div>';
                 } else {
-                    card.href = `earnings.html?stock=${stock}&name=${names[stock]}`;
-                    card.classList.remove('sec-mode');
-                    card.classList.add('earnings-mode');
+                    infoText = (d.fromCache ? '🗄️ 캐시' : '🔄 실시간') + (d.updatedAt ? ' · ' + getTimeAgo(d.updatedAt) : '');
+                    html = '<div class="d-items">' + d.news.map(item => `
+                        <div class="d-news-item">
+                            <div class="d-date">📅 ${item.publishedAt}</div>
+                            <div class="d-news-title">${item.title}</div>
+                            <div class="d-news-source">📰 ${item.source}</div>
+                            ${item.analysis ? `<div class="d-analysis-box">${fmtAnalysis(item.analysis)}</div>`
+                                : item.originalContent ? `<div style="color:#555;line-height:1.7;font-size:13px;margin:8px 0">${item.originalContent}</div>` : ''}
+                            <a href="${item.url}" target="_blank" class="d-link">🔗 원문 보기</a>
+                        </div>`).join('') + '</div>';
                 }
-            });
-            location.hash = tab;
-        }
 
-        // 탭 상태 복원
-        const savedTab = location.hash.replace('#', '');
-        if (['sec', 'earnings'].includes(savedTab)) switchTab(savedTab);
+            } else if (tab === 'sec') {
+                const d = await fetch('/api/sec?stock=' + stock).then(r => r.json());
+                if (!d.success || !d.sec?.length) {
+                    html = '<div class="detail-empty">📭 현재 표시할 공시가 없습니다.</div>';
+                } else {
+                    infoText = (d.fromCache ? '🗄️ 캐시' : '🔄 실시간') + ' · SEC 공시 ' + d.sec.length + '건';
+                    html = '<div class="d-items">' + d.sec.map(item => `
+                        <div class="d-sec-item">
+                            <div class="d-sec-date">📅 ${item.filingDate}</div>
+                            <div class="d-form-row"><span class="d-form-badge">${item.form}</span><span class="d-form-desc">(${item.formDesc})</span></div>
+                            ${item.analysis ? `<div class="d-analysis-box">${fmtAnalysis(item.analysis)}</div>` : ''}
+                            <a href="${item.url}" target="_blank" class="d-link">📋 SEC 원문 보기</a>
+                        </div>`).join('') + '</div>';
+                }
 
-        // 카드별 피드 로드
-        async function loadFeed() {
-            const EMPTY = '<div class="feed-empty">📌 종목 카드를 한 번씩 클릭하면<br>최신 정보가 여기에 표시됩니다.</div>';
-            const tickerBadge = { PLTR: 'badge-pltr', IREN: 'badge-iren', IONQ: 'badge-ionq', BMNR: 'badge-bmnr' };
-
-            function renderItems(items) {
-                if (!items.length) return EMPTY;
-                return items.map(item => `
-                    <a href="${item.url}" class="feed-item">
-                        <span class="feed-badge ${tickerBadge[item.ticker]}">${item.ticker}</span>
-                        <div class="feed-content">
-                            <div class="feed-title">${item.title}</div>
-                            <div class="feed-date">${item.date}</div>
-                        </div>
-                        <span class="feed-arrow">›</span>
-                    </a>
-                `).join('');
+            } else {
+                const d = await fetch('/api/earnings?stock=' + stock).then(r => r.json());
+                if (!d.success || !d.earnings?.length) {
+                    html = '<div class="detail-empty">📭 현재 표시할 실적 데이터가 없습니다.</div>';
+                } else {
+                    infoText = (d.fromCache ? '🗄️ 캐시' : '🔄 실시간') + ' · 실적 ' + d.earnings.length + '건';
+                    html = '<div class="d-items">' + d.earnings.map(item => {
+                        const badge = item.isFuture ? '<span class="d-badge d-badge-future">📅 발표 예정</span>'
+                            : item.beatMiss === 'BEAT' ? '<span class="d-badge d-badge-beat">🎯 예상 초과</span>'
+                            : item.beatMiss === 'MISS' ? '<span class="d-badge d-badge-miss">📉 예상 미달</span>'
+                            : item.beatMiss === 'MEET' ? '<span class="d-badge d-badge-meet">➡️ 예상 부합</span>' : '';
+                        const ec = item.beatMiss === 'BEAT' ? 'beat' : item.beatMiss === 'MISS' ? 'miss' : '';
+                        return `
+                        <div class="d-earnings-item ${item.isFuture ? 'future' : ''}">
+                            <div class="d-badge-row">${badge}<span class="d-earn-date">📅 ${formatDateLong(item.date)}</span><span class="d-earn-hour">⏰ ${item.hourKo}</span></div>
+                            <div class="d-eps-grid">
+                                <div class="d-eps-box"><div class="d-eps-label">📌 예상 EPS</div><div class="d-eps-val">${fmtEPS(item.epsEstimate)}</div><div class="d-eps-sub">애널리스트 예측</div></div>
+                                <div class="d-eps-box"><div class="d-eps-label">${item.isFuture ? '💡 실제 (예정)' : '✅ 실제 EPS'}</div><div class="d-eps-val ${ec}">${item.isFuture ? '-' : fmtEPS(item.epsActual)}</div><div class="d-eps-sub">${item.isFuture ? '발표 후 업데이트' : '실제 수치'}</div></div>
+                                <div class="d-eps-box"><div class="d-eps-label">📊 예상 매출</div><div class="d-eps-val" style="font-size:14px">${fmtRev(item.revenueEstimate)}</div><div class="d-eps-sub">시장 전망치</div></div>
+                                <div class="d-eps-box"><div class="d-eps-label">${item.isFuture ? '💡 실제 (예정)' : '✅ 실제 매출'}</div><div class="d-eps-val" style="font-size:14px">${item.isFuture ? '-' : fmtRev(item.revenueActual)}</div><div class="d-eps-sub">${item.isFuture ? '발표 후 업데이트' : '실제 수치'}</div></div>
+                            </div>
+                            ${item.analysis ? `<div class="d-analysis-box">${fmtAnalysis(item.analysis)}</div>` : ''}
+                        </div>`;
+                    }).join('') + '</div>';
+                }
             }
 
-            try {
-                const res = await fetch('/api/feed');
-                const data = await res.json();
-
-                if (!data.success || !data.feed || data.feed.length === 0) {
-                    ['feed-news', 'feed-sec', 'feed-earnings'].forEach(id => {
-                        document.getElementById(id).innerHTML = EMPTY;
-                    });
-                    return;
-                }
-
-                document.getElementById('feed-news').innerHTML     = renderItems(data.feed.filter(i => i.type === 'news'));
-                document.getElementById('feed-sec').innerHTML      = renderItems(data.feed.filter(i => i.type === 'sec'));
-                document.getElementById('feed-earnings').innerHTML = renderItems(data.feed.filter(i => i.type === 'earnings'));
-            } catch {
-                ['feed-news', 'feed-sec', 'feed-earnings'].forEach(id => {
-                    document.getElementById(id).innerHTML = EMPTY;
-                });
+            if (curStock === stock && curTab === tab) {
+                content.innerHTML = html;
+                info.textContent = infoText;
+                detailCache[key] = { html, info: infoText };
             }
+        } catch {
+            if (curStock === stock && curTab === tab)
+                content.innerHTML = '<div class="detail-empty">❌ 데이터를 불러오지 못했습니다. 다시 시도해주세요.</div>';
         }
+    }
 
-        // 주가 & 보조지표 로드
-        const stockKeys = ['palantir', 'iren', 'ionq', 'biomarin'];
+    // ── 피드 카드 ──
+    async function loadFeed() {
+        const EMPTY = '<div class="feed-empty">📌 종목 카드를 한 번씩 클릭하면<br>최신 정보가 여기에 표시됩니다.</div>';
+        const badge = { PLTR: 'badge-pltr', IREN: 'badge-iren', IONQ: 'badge-ionq', BMNR: 'badge-bmnr' };
+        const render = items => !items.length ? EMPTY : items.map(i => `
+            <a href="${i.url}" class="feed-item">
+                <span class="feed-badge ${badge[i.ticker]}">${i.ticker}</span>
+                <div class="feed-content"><div class="feed-title">${i.title}</div><div class="feed-date">${i.date}</div></div>
+                <span class="feed-arrow">›</span>
+            </a>`).join('');
+        try {
+            const data = await fetch('/api/feed').then(r => r.json());
+            if (!data.success || !data.feed?.length) {
+                ['feed-news','feed-sec','feed-earnings'].forEach(id => document.getElementById(id).innerHTML = EMPTY);
+                return;
+            }
+            document.getElementById('feed-news').innerHTML     = render(data.feed.filter(i => i.type === 'news'));
+            document.getElementById('feed-sec').innerHTML      = render(data.feed.filter(i => i.type === 'sec'));
+            document.getElementById('feed-earnings').innerHTML = render(data.feed.filter(i => i.type === 'earnings'));
+        } catch {
+            ['feed-news','feed-sec','feed-earnings'].forEach(id => document.getElementById(id).innerHTML = EMPTY);
+        }
+    }
 
-        function fmtPrice(v) { return v != null ? '$' + v.toFixed(2) : '-'; }
-        function fmtMoney(v) { return v != null ? '$' + v.toFixed(2) : '-'; }
-        function fmtPct(v) { return v != null ? v.toFixed(1) + '%' : '-'; }
-        function fmtRatio(v) { return v != null ? v.toFixed(1) + '일' : '-'; }
-        function fmtDDay(v) { return v != null ? (v === 0 ? 'D-Day!' : 'D-' + v) : '-'; }
+    // ── 주가 & 보조지표 ──
+    const stockKeys = ['palantir', 'iren', 'ionq', 'biomarin'];
+    const fmtP = v => v != null ? '$' + v.toFixed(2) : '-';
+    const fmtPct = v => v != null ? v.toFixed(1) + '%' : '-';
+    const fmtRatio = v => v != null ? v.toFixed(1) + '일' : '-';
+    const fmtDDay = v => v != null ? (v === 0 ? 'D-Day!' : 'D-' + v) : '-';
 
-        async function loadStockData() {
-            try {
-                const [priceRes, infoRes] = await Promise.all([
-                    fetch('/api/stock-price').then(r => r.json()).catch(() => ({})),
-                    fetch('/api/stock-info').then(r => r.json()).catch(() => ({})),
-                ]);
-
-                const prices = priceRes.prices || {};
-                const info = infoRes.info || {};
-
-                for (const key of stockKeys) {
-                    const p = prices[key];
-                    const d = info[key];
-
-                    if (p) {
-                        const priceEl = document.getElementById('price-' + key);
-                        const changeEl = document.getElementById('change-' + key);
-                        if (priceEl) priceEl.textContent = fmtPrice(p.price);
-                        if (changeEl) {
-                            const cp = p.changePercent;
-                            const sign = cp >= 0 ? '+' : '';
-                            changeEl.textContent = cp != null ? sign + cp.toFixed(2) + '%' : '-';
-                            changeEl.className = 'sc-change' + (cp > 0 ? ' up' : cp < 0 ? ' down' : '');
-                        }
-                    }
-
-                    if (d) {
-                        const descEl = document.getElementById('desc-' + key);
-                        if (descEl) descEl.textContent = d.description || '';
-
-                        const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
-                        set('w52h-' + key, fmtMoney(d.week52High));
-                        set('w52l-' + key, fmtMoney(d.week52Low));
-                        set('target-' + key, fmtMoney(d.targetMean));
-                        set('short-' + key, fmtRatio(d.shortRatio));
-                        set('inst-' + key, fmtPct(d.institutionalOwnership));
-                        set('dday-' + key, fmtDDay(d.dDay));
+    async function loadStockData() {
+        try {
+            const [pr, ir] = await Promise.all([
+                fetch('/api/stock-price').then(r => r.json()).catch(() => ({})),
+                fetch('/api/stock-info').then(r => r.json()).catch(() => ({})),
+            ]);
+            const prices = pr.prices || {}, info = ir.info || {};
+            for (const k of stockKeys) {
+                const p = prices[k], d = info[k];
+                const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+                if (p) {
+                    set('price-' + k, fmtP(p.price));
+                    const cp = p.changePercent;
+                    const el = document.getElementById('change-' + k);
+                    if (el) {
+                        el.textContent = cp != null ? (cp >= 0 ? '+' : '') + cp.toFixed(2) + '%' : '-';
+                        el.className = 'sc-change' + (cp > 0 ? ' up' : cp < 0 ? ' down' : '');
                     }
                 }
-            } catch {}
-        }
+                if (d) {
+                    set('desc-' + k, d.description || '');
+                    set('w52h-' + k, fmtP(d.week52High));
+                    set('w52l-' + k, fmtP(d.week52Low));
+                    set('target-' + k, fmtP(d.targetMean));
+                    set('short-' + k, fmtRatio(d.shortRatio));
+                    set('inst-' + k, fmtPct(d.institutionalOwnership));
+                    set('dday-' + k, fmtDDay(d.dDay));
+                }
+            }
+        } catch {}
+    }
 
-        loadFeed();
-        trackVisitor();
-        loadStockData();
-    </script>
+    loadFeed();
+    trackVisitor();
+    loadStockData();
+</script>
 </body>
 </html>
