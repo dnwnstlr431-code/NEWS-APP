@@ -191,7 +191,7 @@ module.exports = async (req, res) => {
 
   const tickers = {
     palantir:'PLTR', alphabet:'GOOGL', nvidia:'NVDA', amazon:'AMZN',
-    iren:'IREN', newscalepower:'NWP', rocketlab:'RKLB', ionq:'IONQ',
+    iren:'IREN', newscalepower:'SMR', rocketlab:'RKLB', ionq:'IONQ',
     biomarin:'BMNR', planetlabs:'PL',
     apple:'AAPL', microsoft:'MSFT', broadcom:'AVGO', tesla:'TSLA',
     meta:'META', exxonmobil:'XOM', amd:'AMD',

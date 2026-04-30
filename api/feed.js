@@ -16,7 +16,7 @@ const stockMeta = {
   nvidia:        { name: '엔비디아',       ticker: 'NVDA' },
   amazon:        { name: '아마존',         ticker: 'AMZN' },
   iren:          { name: '아이렌',         ticker: 'IREN' },
-  newscalepower: { name: '뉴스케일파워',   ticker: 'NWP' },
+  newscalepower: { name: '뉴스케일파워',   ticker: 'SMR' },
   rocketlab:     { name: '로켓랩',         ticker: 'RKLB' },
   ionq:          { name: '아이온큐',       ticker: 'IONQ' },
   biomarin:      { name: '비트마인',       ticker: 'BMNR' },

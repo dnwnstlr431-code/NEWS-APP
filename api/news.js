@@ -31,7 +31,7 @@ const tickers = {
   'nvidia': 'NVDA',
   'amazon': 'AMZN',
   'iren': 'IREN',
-  'newscalepower': 'NWP',
+  'newscalepower': 'SMR',
   'rocketlab': 'RKLB',
   'ionq': 'IONQ',
   'biomarin': 'BMNR',
