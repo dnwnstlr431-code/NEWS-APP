@@ -189,8 +189,20 @@ module.exports = async (req, res) => {
   const claudeApiKey = process.env.CLAUDE_API_KEY;
   const finnhubApiKey = process.env.FINNHUB_API_KEY;
 
-  const tickers   = { palantir:'PLTR', iren:'IREN', ionq:'IONQ', biomarin:'BMNR' };
-  const stockNames = { palantir:'팔란티어', iren:'아이렌', ionq:'아이온큐', biomarin:'비트마인' };
+  const tickers = {
+    palantir:'PLTR', alphabet:'GOOGL', nvidia:'NVDA', amazon:'AMZN',
+    iren:'IREN', newscalepower:'NWP', rocketlab:'RKLB', ionq:'IONQ',
+    biomarin:'BMNR', emergenttech:'EMG', planetlabs:'PL',
+    apple:'AAPL', microsoft:'MSFT', broadcom:'AVGO', tesla:'TSLA',
+    meta:'META', exxonmobil:'XOM', amd:'AMD',
+  };
+  const stockNames = {
+    palantir:'팔란티어', alphabet:'알파벳', nvidia:'엔비디아', amazon:'아마존',
+    iren:'아이렌', newscalepower:'뉴스케일파워', rocketlab:'로켓랩', ionq:'아이온큐',
+    biomarin:'비트마인', emergenttech:'이머전테크', planetlabs:'플래닛랩스',
+    apple:'애플', microsoft:'마이크로소프트', broadcom:'브로드컴', tesla:'테슬라',
+    meta:'메타', exxonmobil:'엑슨모빌', amd:'AMD',
+  };
   const formDescriptions = {
     '8-K':'중요사항 보고서', '10-Q':'분기 실적 보고서', '10-K':'연간 실적 보고서',
     '4':'임원 주식 매매', '3':'임원 최초 주식 보유 보고', '144':'내부자 주식 매도 예고',
@@ -207,8 +219,8 @@ module.exports = async (req, res) => {
       return res.status(200).json({ success: true, sec: data.sec, updatedAt: data.updatedAt, fromCache: true });
     }
 
-    const ticker    = tickers[stockParam]    || 'PLTR';
-    const stockName = stockNames[stockParam] || '팔란티어';
+    const ticker    = tickers[stockParam]    || stockParam.toUpperCase();
+    const stockName = stockNames[stockParam] || stockParam;
 
     const [filingsRes, insiderRes] = await Promise.all([
       fetch(`https://finnhub.io/api/v1/stock/filings?symbol=${ticker}&token=${finnhubApiKey}`),
