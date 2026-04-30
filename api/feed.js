@@ -5,12 +5,30 @@ const redis = new Redis({
   token: process.env.UPSTASH_REDIS_REST_TOKEN,
 });
 
-const stocks = ['palantir', 'iren', 'ionq', 'biomarin'];
+const stocks = [
+  'palantir', 'alphabet', 'nvidia', 'amazon', 'iren', 'newscalepower',
+  'rocketlab', 'ionq', 'biomarin', 'emergenttech', 'planetlabs',
+  'apple', 'microsoft', 'broadcom', 'tesla', 'meta', 'exxonmobil', 'amd',
+];
 const stockMeta = {
-  palantir: { name: '팔란티어', ticker: 'PLTR', badgeClass: 'badge-pltr' },
-  iren:     { name: '아이렌',   ticker: 'IREN', badgeClass: 'badge-iren' },
-  ionq:     { name: '아이온큐', ticker: 'IONQ', badgeClass: 'badge-ionq' },
-  biomarin: { name: '비트마인', ticker: 'BMNR', badgeClass: 'badge-bmnr' },
+  palantir:      { name: '팔란티어',       ticker: 'PLTR' },
+  alphabet:      { name: '알파벳',         ticker: 'GOOGL' },
+  nvidia:        { name: '엔비디아',       ticker: 'NVDA' },
+  amazon:        { name: '아마존',         ticker: 'AMZN' },
+  iren:          { name: '아이렌',         ticker: 'IREN' },
+  newscalepower: { name: '뉴스케일파워',   ticker: 'NWP' },
+  rocketlab:     { name: '로켓랩',         ticker: 'RKLB' },
+  ionq:          { name: '아이온큐',       ticker: 'IONQ' },
+  biomarin:      { name: '비트마인',       ticker: 'BMNR' },
+  emergenttech:  { name: '이머전테크',     ticker: 'EMG' },
+  planetlabs:    { name: '플래닛랩스',     ticker: 'PL' },
+  apple:         { name: '애플',           ticker: 'AAPL' },
+  microsoft:     { name: '마이크로소프트', ticker: 'MSFT' },
+  broadcom:      { name: '브로드컴',       ticker: 'AVGO' },
+  tesla:         { name: '테슬라',         ticker: 'TSLA' },
+  meta:          { name: '메타',           ticker: 'META' },
+  exxonmobil:    { name: '엑슨모빌',       ticker: 'XOM' },
+  amd:           { name: 'AMD',            ticker: 'AMD' },
 };
 
 const beatMissLabel = { BEAT: '📈 예상 초과', MISS: '📉 예상 미달', MEET: '➡️ 예상 부합' };
@@ -58,9 +76,10 @@ module.exports = async (req, res) => {
     ];
     const results = await Promise.all(keys.map(k => redis.get(k)));
 
+    const n = stocks.length;
     const newsCache     = Object.fromEntries(stocks.map((s, i) => [s, results[i]]));
-    const secCache      = Object.fromEntries(stocks.map((s, i) => [s, results[4 + i]]));
-    const earningsCache = Object.fromEntries(stocks.map((s, i) => [s, results[8 + i]]));
+    const secCache      = Object.fromEntries(stocks.map((s, i) => [s, results[n + i]]));
+    const earningsCache = Object.fromEntries(stocks.map((s, i) => [s, results[2 * n + i]]));
 
     const items = [];
 

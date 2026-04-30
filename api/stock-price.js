@@ -6,10 +6,24 @@ const redis = new Redis({
 });
 
 const stocks = {
-  palantir: 'PLTR',
-  iren: 'IREN',
-  ionq: 'IONQ',
-  biomarin: 'BMNR',
+  palantir:      'PLTR',
+  alphabet:      'GOOGL',
+  nvidia:        'NVDA',
+  amazon:        'AMZN',
+  iren:          'IREN',
+  newscalepower: 'NWP',
+  rocketlab:     'RKLB',
+  ionq:          'IONQ',
+  biomarin:      'BMNR',
+  emergenttech:  'EMG',
+  planetlabs:    'PL',
+  apple:         'AAPL',
+  microsoft:     'MSFT',
+  broadcom:      'AVGO',
+  tesla:         'TSLA',
+  meta:          'META',
+  exxonmobil:    'XOM',
+  amd:           'AMD',
 };
 
 module.exports = async (req, res) => {
