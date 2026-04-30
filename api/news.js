@@ -105,13 +105,24 @@ module.exports = async (req, res) => {
       };
     }).filter(a => a.title);
 
-    // 티커 심볼이 제목 또는 내용에 포함된 기사만 우선 사용
+    // 티커 또는 회사명으로 필터링 (Yahoo RSS는 이미 종목 전용이지만 텍스트엔 회사명만 나올 수 있음)
     const tickerUpper = ticker.toUpperCase();
-    const relevant = parsed.filter(a =>
-      (a.title + ' ' + a.description).toUpperCase().includes(tickerUpper)
-    );
-    // 관련 기사가 1개 이상이면 사용, 없으면 빈 배열 (무관 기사 노출 방지)
-    const articles = (relevant.length >= 1 ? relevant : []).slice(0, 5);
+    const companyKeywords = {
+      'PLTR': ['PALANTIR'], 'GOOGL': ['ALPHABET', 'GOOGLE'], 'NVDA': ['NVIDIA'],
+      'AMZN': ['AMAZON'], 'IREN': ['IREN'], 'SMR': ['NUSCALE', 'NEWSCALE'],
+      'RKLB': ['ROCKET LAB', 'ROCKETLAB'], 'IONQ': ['IONQ'],
+      'BMNR': ['BITMINER', 'BIOMARIN'], 'PL': ['PLANET LABS', 'PLANETLABS'],
+      'AAPL': ['APPLE'], 'MSFT': ['MICROSOFT'], 'AVGO': ['BROADCOM'],
+      'TSLA': ['TESLA'], 'META': ['META', 'FACEBOOK'], 'XOM': ['EXXON'],
+      'AMD': ['AMD', 'ADVANCED MICRO'],
+    };
+    const keywords = [tickerUpper, ...(companyKeywords[tickerUpper] || [])];
+    const relevant = parsed.filter(a => {
+      const text = (a.title + ' ' + a.description).toUpperCase();
+      return keywords.some(kw => text.includes(kw));
+    });
+    // 관련 기사가 있으면 사용, 없으면 RSS 피드 전체 사용 (이미 종목 전용 피드이므로 안전)
+    const articles = (relevant.length >= 1 ? relevant : parsed).slice(0, 5);
 
     const news = await Promise.all(articles.map(async (article) => {
       const originalText = article.description || article.title || '내용 없음';
