@@ -426,7 +426,6 @@
         rocketlab:     { name: '로켓랩',         ticker: 'RKLB', color: '#C0392B', bg: '#FADBD8' },
         ionq:          { name: '아이온큐',       ticker: 'IONQ', color: '#5B7FA6', bg: '#EBF5FB' },
         biomarin:      { name: '비트마인',       ticker: 'BMNR', color: '#7BAE85', bg: '#EAFAF1' },
-        emergenttech:  { name: '이머전테크',     ticker: 'EMG',  color: '#9B59B6', bg: '#F5EEF8' },
         planetlabs:    { name: '플래닛랩스',     ticker: 'PL',   color: '#1ABC9C', bg: '#E8F8F5' },
         apple:         { name: '애플',           ticker: 'AAPL', color: '#555555', bg: '#F2F3F4' },
         microsoft:     { name: '마이크로소프트', ticker: 'MSFT', color: '#0078D4', bg: '#E3F2FD' },
@@ -439,7 +438,7 @@
     const stockOrder = [
         'palantir','iren','ionq','biomarin',
         'nvidia','amazon','alphabet','apple','microsoft','meta','broadcom','tesla','amd',
-        'newscalepower','rocketlab','emergenttech','planetlabs','exxonmobil',
+        'newscalepower','rocketlab','planetlabs','exxonmobil',
     ];
     const DEFAULT_STOCKS = ['palantir', 'iren', 'ionq', 'biomarin'];
     const LS_VISITED = 'tjs_visited';
@@ -572,10 +571,6 @@
                 <div class="sc-data-grid">
                     <div class="sc-data-cell"><div class="sc-data-label">52주 고가</div><div class="sc-data-val" id="w52h-${key}">-</div></div>
                     <div class="sc-data-cell"><div class="sc-data-label">52주 저가</div><div class="sc-data-val" id="w52l-${key}">-</div></div>
-                    <div class="sc-data-cell"><div class="sc-data-label">목표주가</div><div class="sc-data-val" id="target-${key}">-</div></div>
-                    <div class="sc-data-cell"><div class="sc-data-label">공매도</div><div class="sc-data-val" id="short-${key}">-</div></div>
-                    <div class="sc-data-cell"><div class="sc-data-label">기관비중</div><div class="sc-data-val" id="inst-${key}">-</div></div>
-                    <div class="sc-data-cell"><div class="sc-data-label">실적 D-day</div><div class="sc-data-val sc-dday-val" id="dday-${key}">-</div></div>
                 </div>
                 <button class="stock-action" onclick="event.stopPropagation(); openNews('${key}')">📰 이 종목 뉴스 보기</button>
             </div>`;
@@ -726,10 +721,7 @@
     }
 
     // ── 주가 & 보조지표 ──
-    const fmtP     = v => v != null ? '$' + v.toFixed(2) : '-';
-    const fmtPct   = v => v != null ? v.toFixed(1) + '%' : '-';
-    const fmtShort = (pct, ratio) => pct != null ? pct.toFixed(1) + '%' : ratio != null ? ratio.toFixed(1) + '일' : '-';
-    const fmtDDay  = v => v != null ? (v === 0 ? 'D-Day!' : 'D-' + v) : '-';
+    const fmtP = v => v != null ? '$' + v.toFixed(2) : '-';
 
     async function loadStockData() {
         try {
@@ -751,13 +743,9 @@
                     }
                 }
                 if (d) {
-                    set('desc-'   + k, d.description || '');
-                    set('w52h-'   + k, fmtP(d.week52High));
-                    set('w52l-'   + k, fmtP(d.week52Low));
-                    set('target-' + k, fmtP(d.targetMean));
-                    set('short-'  + k, fmtShort(d.shortPercent, d.shortRatio));
-                    set('inst-'   + k, fmtPct(d.institutionalOwnership));
-                    set('dday-'   + k, fmtDDay(d.dDay));
+                    set('desc-' + k, d.description || '');
+                    set('w52h-' + k, fmtP(d.week52High));
+                    set('w52l-' + k, fmtP(d.week52Low));
                 }
             }
         } catch {}

@@ -15,7 +15,6 @@ const stocks = {
   rocketlab:     'RKLB',
   ionq:          'IONQ',
   biomarin:      'BMNR',
-  emergenttech:  'EMG',
   planetlabs:    'PL',
   apple:         'AAPL',
   microsoft:     'MSFT',

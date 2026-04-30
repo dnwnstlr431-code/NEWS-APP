@@ -7,7 +7,7 @@ const redis = new Redis({
 
 const stocks = [
   'palantir', 'alphabet', 'nvidia', 'amazon', 'iren', 'newscalepower',
-  'rocketlab', 'ionq', 'biomarin', 'emergenttech', 'planetlabs',
+  'rocketlab', 'ionq', 'biomarin', 'planetlabs',
   'apple', 'microsoft', 'broadcom', 'tesla', 'meta', 'exxonmobil', 'amd',
 ];
 const stockMeta = {
@@ -20,7 +20,6 @@ const stockMeta = {
   rocketlab:     { name: '로켓랩',         ticker: 'RKLB' },
   ionq:          { name: '아이온큐',       ticker: 'IONQ' },
   biomarin:      { name: '비트마인',       ticker: 'BMNR' },
-  emergenttech:  { name: '이머전테크',     ticker: 'EMG' },
   planetlabs:    { name: '플래닛랩스',     ticker: 'PL' },
   apple:         { name: '애플',           ticker: 'AAPL' },
   microsoft:     { name: '마이크로소프트', ticker: 'MSFT' },

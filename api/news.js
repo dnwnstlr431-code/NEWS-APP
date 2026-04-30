@@ -7,16 +7,42 @@ const redis = new Redis({
 
 const stockNames = {
   'palantir': '팔란티어',
+  'alphabet': '알파벳',
+  'nvidia': '엔비디아',
+  'amazon': '아마존',
   'iren': '아이렌',
+  'newscalepower': '뉴스케일파워',
+  'rocketlab': '로켓랩',
   'ionq': '아이온큐',
-  'biomarin': '비트마인'
+  'biomarin': '비트마인',
+  'planetlabs': '플래닛랩스',
+  'apple': '애플',
+  'microsoft': '마이크로소프트',
+  'broadcom': '브로드컴',
+  'tesla': '테슬라',
+  'meta': '메타',
+  'exxonmobil': '엑슨모빌',
+  'amd': 'AMD'
 };
 
 const tickers = {
   'palantir': 'PLTR',
+  'alphabet': 'GOOGL',
+  'nvidia': 'NVDA',
+  'amazon': 'AMZN',
   'iren': 'IREN',
+  'newscalepower': 'NWP',
+  'rocketlab': 'RKLB',
   'ionq': 'IONQ',
-  'biomarin': 'BMNR'
+  'biomarin': 'BMNR',
+  'planetlabs': 'PL',
+  'apple': 'AAPL',
+  'microsoft': 'MSFT',
+  'broadcom': 'AVGO',
+  'tesla': 'TSLA',
+  'meta': 'META',
+  'exxonmobil': 'XOM',
+  'amd': 'AMD'
 };
 
 function toKSTString(dateStr) {
@@ -56,10 +82,10 @@ module.exports = async (req, res) => {
       });
     }
 
-    const ticker = tickers[stockParam] || 'PLTR';
-    const stockName = stockNames[stockParam] || '팔란티어';
+    const ticker = tickers[stockParam] || stockParam.toUpperCase();
+    const stockName = stockNames[stockParam] || stockParam.toUpperCase();
 
-    const rssUrl = `https://finance.yahoo.com/rss/headline?s=${ticker}`;
+    const rssUrl = `https://finance.yahoo.com/rss/headline?s=${encodeURIComponent(ticker)}`;
     const rssRes = await fetch(rssUrl);
     const rssText = await rssRes.text();
     const items = rssText.match(/<item>([\s\S]*?)<\/item>/g) || [];
@@ -84,8 +110,8 @@ module.exports = async (req, res) => {
     const relevant = parsed.filter(a =>
       (a.title + ' ' + a.description).toUpperCase().includes(tickerUpper)
     );
-    // 관련 기사가 2개 이상이면 필터된 결과 사용, 아니면 전체에서 사용
-    const articles = (relevant.length >= 2 ? relevant : parsed).slice(0, 5);
+    // 관련 기사가 1개 이상이면 사용, 없으면 빈 배열 (무관 기사 노출 방지)
+    const articles = (relevant.length >= 1 ? relevant : []).slice(0, 5);
 
     const news = await Promise.all(articles.map(async (article) => {
       const originalText = article.description || article.title || '내용 없음';

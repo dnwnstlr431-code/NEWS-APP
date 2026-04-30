@@ -8,7 +8,7 @@ const redis = new Redis({
 const stockNames = {
   palantir:'팔란티어', alphabet:'알파벳', nvidia:'엔비디아', amazon:'아마존',
   iren:'아이렌', newscalepower:'뉴스케일파워', rocketlab:'로켓랩', ionq:'아이온큐',
-  biomarin:'비트마인', emergenttech:'이머전테크', planetlabs:'플래닛랩스',
+  biomarin:'비트마인', planetlabs:'플래닛랩스',
   apple:'애플', microsoft:'마이크로소프트', broadcom:'브로드컴', tesla:'테슬라',
   meta:'메타', exxonmobil:'엑슨모빌', amd:'AMD',
 };
@@ -16,7 +16,7 @@ const stockNames = {
 const tickers = {
   palantir:'PLTR', alphabet:'GOOGL', nvidia:'NVDA', amazon:'AMZN',
   iren:'IREN', newscalepower:'NWP', rocketlab:'RKLB', ionq:'IONQ',
-  biomarin:'BMNR', emergenttech:'EMG', planetlabs:'PL',
+  biomarin:'BMNR', planetlabs:'PL',
   apple:'AAPL', microsoft:'MSFT', broadcom:'AVGO', tesla:'TSLA',
   meta:'META', exxonmobil:'XOM', amd:'AMD',
 };
