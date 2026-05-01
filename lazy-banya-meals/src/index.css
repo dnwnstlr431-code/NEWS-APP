@@ -10,9 +10,9 @@ body,
 
 body {
   margin: 0;
-  font-family: 'Noto Sans KR', sans-serif;
-  background: #f5f7fb;
-  color: #142d4c;
+  font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif;
+  background: #606060;
+  color: #333333;
 }
 
 button,
