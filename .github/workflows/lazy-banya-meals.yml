@@ -1,0 +1,26 @@
+name: Lazy Banya Meals Build
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'lazy-banya-meals/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install dependencies
+        run: |
+          cd lazy-banya-meals
+          npm install
+      - name: Build app
+        run: |
+          cd lazy-banya-meals
+          npm run build
